@@ -7,3 +7,18 @@
 מתודות RETRIEVE
 התחלנו רק את INSERT
 הערות בהקשר INSERT - צריך להתייחס - גלגולים, לעדכן את השדה SIZE 
+
+24/03
+added LISTTOARRAY
+added LAST
+added FIRST
+updated ISREALNODE
+added GETROOT
+added LISTTOARRAY
+added LENGTH
+added SEARCH
+added TREE_RANK
+added getBF
+
+Left to do in next meetings: finish insert, delete, Join, Split, sucessor, predecessor
+next meeting: insert, pre, succ
