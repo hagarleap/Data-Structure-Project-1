@@ -21,6 +21,7 @@ class AVLNode(object):
 		self.parent = None
 		self.height = -1
 		self.size = 0
+		self.HightUpdate = False
 		
 
 	"""returns the left child
@@ -71,6 +72,17 @@ class AVLNode(object):
 	"""
 	def getSize(self):
 		return self.size
+
+
+	#new field that we added
+	"""returns if HightUpdate in the last updateMeserments
+
+	@rtype: bool
+	@returns: the HightUpdate-  true or false 
+	"""
+	def getHightUpdate(self):
+		return self.HightUpdate
+
 
 	"""sets left child
 
@@ -128,6 +140,18 @@ class AVLNode(object):
 		self.size = x
 		# return None
 
+
+"""sets the HightUpdate of the node
+
+	@type h: bool
+	@param h: the HightUpdate
+	"""
+
+	def setHightUpdate(self, boolen):
+		self.HightUpdate = boolen
+
+
+
 	"""returns whether self is not a virtual node 
 
 	@rtype: bool
@@ -184,15 +208,15 @@ class AVLTreeList(object):
 	def retrieve(self, i):
 		if (i<0 or i>= length(self)): 
 			return None
-		return TreeSelectRec(getRoot(self) ,i+1)
+		return getValue(TreeSelectRec(getRoot(self) ,i+1))
 	
 	"""retrieves the value of the i'th item in the list
 
 	@type i: int
 	@pre: 1 <= i < self.length()
 	@param i: index in the list
-	@rtype: str
-	@returns: the the value of the i'th item in the list
+	@rtype: node
+	@returns: the the node of the i'th item in the list
 	"""
 	# pseudo code TreeSelectRec(x, i)
 	# r = x.left.size +1
@@ -205,7 +229,7 @@ class AVLTreeList(object):
 	def TreeSelectRec(x, i)
 		r = getSize(getLeft(x)) +1
 		if i==r:
-			return getValue(x)
+			return x
 		elif i<r:
 			return TreeSelectRec(getLeft(x), i)
 		else:
@@ -229,14 +253,44 @@ class AVLTreeList(object):
 	"""returns predecessor 
 
 	@type node: AVLNode
-	@pre: node is not virtual
+	@pre: node is not virtual, node is not first/min
 	@param node: the node we want to find's predecessor
 	@rtype: node
-	@returns: the predecessor
+	@returns: the predecessor node
 	"""
+	# time complexity(log(n))
 
-	def getPredecessor
+	def getPredecessor(node):
+		if isRealNode(getLeft(node)):
+			return MaxNode(getLeft(node))
+		y = getParent(node)
+		#לבדוק אולי צריך להוסיף פונצקיית שיווין
+		while (y!= None) and (node == getLeft(y)) :
+			node = y
+			y = getParent(node)
+		return y 
 
+
+	"""returns Successor 
+
+	@type node: AVLNode
+	@pre: node is not virtual, node is not last,max
+	@param node: the node we want to find's successor
+	@rtype: node
+	@returns: the successor node 
+
+	"""
+	# time complexity(log(n))
+
+	def getSuccessor(node):
+	if isRealNode(getRight(node)):
+		return MinNode(getRight(node))
+	y = getParent(node)
+	#לבדוק אולי צריך להוסיף פונצקיית שיווין
+	while (y!= None) and (node == getRight(y)) :
+		node = y
+		y= getParent(node)
+	return y
 
 
 
@@ -268,6 +322,126 @@ class AVLTreeList(object):
 
 
 	def insert(self, i, val):
+		newNode = AVLNode(val)
+		#if empty tree, we create new tree
+		if empty(self):
+			self.root = newNode
+			virtualRight = AVLNode(None)
+			virtualLeft = AVLNode(None)
+			setRight(newNode,virtualRight)
+			setLeft(newNode,virtualLeft)
+		#1
+		else:
+			if i==length(self) :
+			#insert last, max has two virtual nodes, we insert in between max and its virtual node
+			#the newNode, than make new leftVirtual to the newNode 
+			max = MaxNode(getRoot(self))
+			virtualLeft = AVLNode(None)
+			virtualRight = getRight(max)
+			setRight(newNode,virtualRight)
+			setLeft(newNode,virtualLeft)
+			setRight(max,newNode)
+			else:
+				currNode = TreeSelectRec(getRoot(self) ,i+1)
+				if not isRealNode(getLeft(currNode)):
+					#insert in index i, curr has left virtual nodes, we insert in between curr and its virtual node
+					#the newNode, than make new RightVirtual to the newNode  
+					virtualLeft = getLeft(currNode)
+					virtualRight = AVLNode(None)
+					setLeft(newNode,virtualLeft)
+					setRight(newNode, virtualRight)
+					setLeft(currNode,newNode)
+				else:
+					#insert in index i, pre has two virtual nodes, we insert in between pre and its virtual node
+					#the newNode, than make new leftVirtual to the newNode 
+					preNode = getPredecessor(currNode)
+					virtualLeft = AVLNode(None)
+					virtualRight = getRight(preNode)
+					setRight(newNode,virtualRight)
+					setLeft(newNode,virtualLeft)
+					setRight(preNode,newNode)
+					
+
+			updatePathMeasurements(newNode) #update size and hight
+			#2
+			y = getParent(newNode)
+			while (isRealNode(y)) and (y!=None):
+				if abs(getBF(y)) < 2 :
+					if not getHightUpdate(y):
+						break
+					else:
+						y = getParent(y)
+				else: #getBF(y)=2
+					InsertRotation(y)
+					break
+
+"""rotation for insert
+	@pre: node is real
+	@returns: None
+	"""
+	# 	rotation(node)
+		# if BF == -2
+		# 	if getBF(getright) == -1:
+		# 		Left rotation
+				
+		# 	else:
+		# 		right rotation
+		# 		left rotation
+		# else:
+		# 	if getBF(getleft) == +1
+		# 		right rotation
+		# 	else:
+		# 		left rotation
+		# right rotation			
+	def InsertRotation(node):
+		if getBF(node) == -2:
+			if  getBF(getRight(node)) ==-1:
+				LeftRotation(node)
+			else:
+				#לא בטוח שזה על אותו node 
+				#צריך להבין
+				RightRotation(node)
+				LeftRotation(node)
+		else:
+			if getBF(getLeft(node)) == 1:
+				RightRotation(node)
+			else:
+				#לא בטוח שזה על אותו node 
+				#צריך להבין
+				LeftRotation(node)
+				RightRotation(node)
+
+
+		
+
+	"""update size and hight of path between newNode and root
+	@pre: node is real
+	@returns: None
+	"""
+	#We go all the way until we arrive the root
+	#time complexity: O(log(n))
+	def updatePathMeasurements(node):
+		y = node	
+		while (y!=None):
+			#update hight
+			lefthight= getHight(getRight(node))
+			righthight = getHight(getLeft(node))
+			newhight = max(lefthight, righthight)+1
+			if (oldHight==newhight): #y hight hasn't changed
+				setHightUpdate(node,False)
+			else:	
+				setHeight(node,newhight)
+				setHightUpdate(node,True)
+			#update size
+			rightsize = getSize(getRight(node))
+			leftsize  = getSize(getLeft(node))
+			newsize = rightsize + leftsize + 1
+			setSize(node,newsize)
+			#go to the parent until you arive the root
+			y = getParent(node)
+
+		
+
 
 
 
@@ -311,7 +485,35 @@ class AVLTreeList(object):
 		while isRealNode(getRight(node)): 
 			node = getRight(node)
 		return getValue(node)
-		
+
+
+	"""given a certain node and returns the min node
+
+	@rtype: AVL node
+	@returns: the min Node , Node itself if there is no left node
+	"""
+	#We go all the way left until we arrive at a virtual node
+	#time complexity: O(log(n))
+	def MinNode(node):
+		while isRealNode(getLeft(node)): 
+			node = getLeft(node)
+		return node	
+
+	"""given a certain node and returns the max node
+
+	@rtype: AVL node
+	@returns: the max Node , Node itself if there is no right node
+	"""
+	#We go all the way right until we arrive at a virtual node
+	#time complexity: O(log(n))
+	def MaxNode(node):
+		while isRealNode(getRight(node)): 
+			node = getRight(node)
+		return node	
+
+
+
+
 
 	"""returns an array representing list 
 
