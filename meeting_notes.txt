@@ -22,3 +22,21 @@ added getBF
 
 Left to do in next meetings: finish insert, delete, Join, Split, sucessor, predecessor
 next meeting: insert, pre, succ
+
+28/03
+added MINNODE - will help successor function
+added SUCCESSOR
+added MAXNODE- will help predecessor function
+added UPDATEPATHMEASUREMENTS
+added new field HIGHTUPDATE
+added GETHIGHTUPDATE
+added SETHIGHTUPDATE
+added INSERTROTATION
+
+Left to do in next meetings: finish insert, delete, Join, Split
+next meeting: finish insert, 
+rotateRight, 
+rotateLeft, 
+figure out if rotations take place on the same node when two rotoations happen 
+one after another, make sure to update size  and hight again within the rotation
+calc time complexity for all rotation funcs
