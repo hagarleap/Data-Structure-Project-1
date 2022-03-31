@@ -33,10 +33,18 @@ added GETHIGHTUPDATE
 added SETHIGHTUPDATE
 added INSERTROTATION
 
-Left to do in next meetings: finish insert, delete, Join, Split
-next meeting: finish insert, 
-rotateRight, 
-rotateLeft, 
-figure out if rotations take place on the same node when two rotoations happen 
-one after another, make sure to update size  and hight again within the rotation
-calc time complexity for all rotation funcs
+31/03
+added rotateRight
+added rotateLeft
+finish insert
+
+
+
+Left to do in next meetings: 
+ Join, concat
+ 
+next meeting- 
+finish delete- root case
+checking delete and insert to see it works
+
+
