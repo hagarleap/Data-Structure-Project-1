@@ -320,9 +320,14 @@ class AVLTreeList(object):
 	# 		2.3.2 make z its right child
 	# 3.  fix the tree
 
+	#time complexity: O(log(n))
 
 	def insert(self, i, val):
+
 		newNode = AVLNode(val)
+		balancing_steps = 0 #counting how many fixes to hight and rotations
+
+
 		#if empty tree, we create new tree
 		if empty(self):
 			self.root = newNode
@@ -362,7 +367,7 @@ class AVLTreeList(object):
 					setRight(preNode,newNode)
 					
 
-			updatePathMeasurements(newNode) #update size and hight
+			balancing_steps = updatePathMeasurements(newNode, balancing_steps) #update size and hight and balancing_steps
 			#2
 			y = getParent(newNode)
 			while (isRealNode(y)) and (y!=None):
@@ -372,12 +377,14 @@ class AVLTreeList(object):
 					else:
 						y = getParent(y)
 				else: #getBF(y)=2
-					InsertRotation(y)
+					balancing_steps = ImplementRotation(self, y, balancing_steps)
 					break
 
-"""rotation for insert
+		return balancing_steps
+
+"""decides which types of rotations will take place for insert
 	@pre: node is real
-	@returns: None
+	@returns: amount of balancing steps so far
 	"""
 	# 	rotation(node)
 		# if BF == -2
@@ -392,24 +399,102 @@ class AVLTreeList(object):
 		# 		right rotation
 		# 	else:
 		# 		left rotation
-		# right rotation			
-	def InsertRotation(node):
+		# right rotation
+
+		#time complexity O(1)
+
+	def ImplementRotation(self, node, balancing_steps):
+
 		if getBF(node) == -2:
-			if  getBF(getRight(node)) ==-1:
-				LeftRotation(node)
-			else:
-				#לא בטוח שזה על אותו node 
-				#צריך להבין
-				RightRotation(node)
-				LeftRotation(node)
+
+			if  getBF(getRight(node)) ==-1 or getBF(getRight(node)) ==0:    #child BF == -1 or 0
+				LeftRotation(self,node)
+				balancing_steps += 1
+
+			else:															#child BF == +1
+				RightRotation(self,getRight(node))
+				LeftRotation(self,node)
+				balancing_steps+=2
 		else:
-			if getBF(getLeft(node)) == 1:
-				RightRotation(node)
+
+			if getBF(getLeft(node)) == 1 or getBF(getLeft(node)) == 0: 		#child BF == +1 or 0
+				RightRotation(self,node)
+				balancing_steps+=1
+
+			else: 															#child BF == -1
+				LeftRotation(self,getLeft(node))
+				RightRotation(self,node)
+				balancing_steps+=2
+
+		return balancing_steps
+
+
+	"""does right rotation on given node
+	@pre: node is real
+	@returns: none
+	"""
+	#time complexity: O(1)
+
+	def RightRotation(self, B):
+		B_is_root=False
+
+		if getParent(B) == None: ##if none then B is root
+			B_is_root = True
+
+		A = getLeft(B)
+		setLeft(B, getRight(A))
+		setParent(getLeft(B), B)
+		setRight(A,B)
+		if B_is_root:
+			self.root = A
+
+		else:	
+			setParent(A, getParent(B))
+			if is_left_child(B):
+				setLeft(getParent(A), A)
 			else:
-				#לא בטוח שזה על אותו node 
-				#צריך להבין
-				LeftRotation(node)
-				RightRotation(node)
+				setRight(getParent(A), A)
+
+		setParent(B, A)
+
+		setHeight(B, max(getHeight(getLeft(B)), getHeight(getRight(B))) + 1 )
+		setSize(B, getSize(getLeft(B)) + getSize(getRight(B)) + 1 )
+		setSize(A, getSize(getLeft(A)) + getSize(getRight(A)) + 1 )
+
+	"""does right rotation on given node
+	@pre: node is real
+	@returns: none
+	"""
+	#time complexity: O(1)
+	
+	def LeftRotation(self, B):
+		B_is_root=False
+
+		if B == getRoot(self):
+			B_is_root = True
+
+		A = getRight(B)
+		setRight(B, getLeft(A))
+		setParent(getRight(B), B)
+		setLeft(A,B)
+		if B_is_root:
+			self.root = A
+
+		else:	
+			setParent(A, getParent(B))
+			if is_left_child(B):
+				setLeft(getParent(A), A)
+			else:
+				setRight(getParent(A), A)
+
+		setParent(B, A)
+
+		setHeight(B, max(getHeight(getLeft(B)), getHeight(getRight(B))) + 1 )
+		setSize(B, getSize(getLeft(B)) + getSize(getRight(B)) + 1 )
+		setSize(A, getSize(getLeft(A)) + getSize(getRight(A)) + 1 )
+
+
+
 
 
 		
@@ -420,7 +505,7 @@ class AVLTreeList(object):
 	"""
 	#We go all the way until we arrive the root
 	#time complexity: O(log(n))
-	def updatePathMeasurements(node):
+	def updatePathMeasurements(node, balancing_steps):
 		y = node	
 		while (y!=None):
 			#update hight
@@ -432,6 +517,8 @@ class AVLTreeList(object):
 			else:	
 				setHeight(node,newhight)
 				setHightUpdate(node,True)
+				balancing_steps += 1
+
 			#update size
 			rightsize = getSize(getRight(node))
 			leftsize  = getSize(getLeft(node))
@@ -439,6 +526,8 @@ class AVLTreeList(object):
 			setSize(node,newsize)
 			#go to the parent until you arive the root
 			y = getParent(node)
+
+			return balancing_steps
 
 		
 
@@ -454,9 +543,139 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def delete(self, i):
-		return -1
+# 	AVL-Delete(T, 𝒛)
 
+# 0. check if root for edge case
+
+# 1. Case 1: 𝑥 is a leaf
+	# Case 2: 𝑥 has only one child
+	# Case 3: If 𝑥 has two children
+
+# 2. Let 𝑦 be the parent of the (physically) deleted node.
+# 3. while 𝑦 ≠ 𝑁𝑢𝑙𝑙 do:
+	# 3.1. compute 𝐵𝐹(𝑦)*
+	# 3.2. if |𝐵𝐹(𝑦)| < 2 and 𝑦’s height hasn’t changed: terminate
+	# 3.3. else if |𝐵𝐹(𝑦)| < 2 and 𝑦’s height changed: go back to stage 3 with 𝑦’s parent
+	# 3.4. else (|𝐵𝐹(𝑦)| = 2): perform a rotation and go back to stage 3 with 𝑦’s parent
+
+
+
+	def delete(self, i):
+
+		if i>= self.length() or i<0: #check that list isnt empty
+			return -1
+
+		balancing_steps = 0 #how many balancing steps we made
+		node = TreeSelectRec(getRoot(self), i)
+
+		if node == self.getRoot():  #0
+			#insert code here
+		else:
+
+			children = 0				#checks how many children, and if so, which one is it (left T or F)
+			hasLeft = False
+			if isRealNode(getLeft(node)):
+				children+=1
+				hasLeft = True
+			if isRealNode(getRight(node)):
+				children+=1
+
+
+			y = getParent(node) 					#2		
+
+			if children == 0: 										#1.case_1   		
+				if is_left_child(node):
+					setParent(getLeft(node), y)
+					setLeft(y, getLeft(node))
+					#AVLdelete(node)  gotta create this
+				else:
+					setParent(getRight(node), y)
+					setRight(y, getRight(node))
+					#AVLdelete(node)  gotta create this
+
+			elif children == 1:											#1.case_2
+				if hasLeft: 
+					if is_left_child(node): 							#has left child and is left child
+						setParent(getLeft(node), y)
+						setLeft(y, getLeft(node))
+						#AVLdelete(node)  gotta create this
+					else:												#has left child and is right child
+						setParent(getLeft(node), y)
+						setRight(y, getLeft(node))
+						#AVLdelete(node)  gotta create this
+
+				else:													 
+					if is_left_child(node):								 #has right child and is left child
+						setParent(getRight(node), y)
+						setLeft(y, getRight(node))
+						#AVLdelete(node)  gotta create this
+					else:												#has right child and is right child
+						setParent(getRight(node), y)
+						setRight(y, getRight(node))
+						#AVLdelete(node)  gotta create this
+
+			else:															#1.case_3
+																						
+				successor = getSuccessor(node)
+				y = getParent(successor)  									#because of successor being deleted node in terms of shape, we start fixing here
+				setParent(getRight(successor), getParent(successor))		#successor ALWAYS has right child and is left child
+				setLeft(getParent(successor), getRight(successor))
+
+				setParent(successor, getParent(node))     					  #steal node's parent
+				if is_left_child(node):
+					setLeft(getParent(successor), successor)
+				else:
+					setRight(getParent(successor), successor)
+
+				setRight(successor, getRight(node))							#steal node's right child
+				setParent(getRight(successor), successor)
+
+				setLeft(successor, getLeft(node))							#steal node's left child
+				setParent(getLeft(successor), successor)
+				
+				#AVLdelete(node)  gotta create this
+			
+			########## done with 1 and 2 ####################
+			########## start 3 ##############################
+
+			balancing_steps = updatePathMeasurements(y, balancing_steps) #update size and hight and balancing_steps
+				
+				
+			while (isRealNode(y)) and (y!=None):
+				if abs(getBF(y)) < 2 :
+					if not getHightUpdate(y):
+						break
+					else:
+						y = getParent(y)
+				else: #getBF(y)=2
+					balancing_steps = ImplementRotation(self, y, balancing_steps)
+					y = getParent(y)
+
+			return balancing_steps	
+			
+
+
+
+
+
+				
+
+
+
+
+				
+
+
+		
+"""returns bool if node is left child
+	@pre: node has parent
+	@rtype: bool
+	@returns: returns true if node is left child
+	"""
+	def is_left_child(node):
+		if node == getLeft(getParent(node)):
+			return True 
+		return False
 
 	"""returns the value of the first item in the list
 
@@ -467,6 +686,8 @@ class AVLTreeList(object):
 	#time complexity: O(log(n))
 
 	def first(self):
+		if self.empty():
+			return None
 		node = self.root
 		while isRealNode(getLeft(node)): 
 			node = getLeft(node)
@@ -481,6 +702,8 @@ class AVLTreeList(object):
 	#time complexity: O(log(n))
 
 	def last(self):
+		if self.empty():
+			return None
 		node = self.root
 		while isRealNode(getRight(node)): 
 			node = getRight(node)
