@@ -38,13 +38,20 @@ added rotateRight
 added rotateLeft
 finish insert
 
+04/04
+added Avldelete
+added Delete_style_balancing
+added join
 
 
 Left to do in next meetings: 
- Join, concat
+split , concat 
+checking everything to see it works
+לעבור על הדף שגיאות של סמסטר קודם ולתקן בקוד שלנו
  
 next meeting- 
-finish delete- root case
-checking delete and insert to see it works
+split , concat 
+checking everything to see it works
+לעבור על הדף שגיאות של סמסטר קודם ולתקן בקוד שלנו
 
 
