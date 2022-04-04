@@ -91,7 +91,7 @@ class AVLNode(object):
 	"""
 	def setLeft(self, node):
 		self.left = node
-		setParent(node, self)
+		self.setParent()
 	#	return None
 
 	"""sets right child
@@ -101,7 +101,7 @@ class AVLNode(object):
 	"""
 	def setRight(self, node):
 		self.right = node
-		setParent(node, self)
+		node.setParent(self)
 		# return None
 
 	"""sets parent
@@ -131,6 +131,17 @@ class AVLNode(object):
 		self.height = h
 		# return None
 
+
+	"""sets the HightUpdate of the node
+
+	@type h: bool
+	@param h: the HightUpdate
+	"""
+
+	def setHightUpdate(self, boolean):
+		self.HightUpdate = boolean
+
+
 	"""sets the rank of the node
 
 	@type h: int
@@ -140,24 +151,12 @@ class AVLNode(object):
 		self.size = x
 		# return None
 
-
-"""sets the HightUpdate of the node
-
-	@type h: bool
-	@param h: the HightUpdate
-	"""
-
-	def setHightUpdate(self, boolen):
-		self.HightUpdate = boolen
-
-
-
 	"""returns whether self is not a virtual node 
 
 	@rtype: bool
 	@returns: False if self is a virtual node, True otherwise.
 	"""
-	def isRealNode(isRealNode(self):
+	def isRealNode(self):
 		if (self.height == -1) and (self.value == None):
 			return False
 		return True
@@ -187,7 +186,7 @@ class AVLTreeList(object):
 	# if root is not real (since we initialized it as virtual node) then Tree is empty
 	#O(1) since isRealNode is O(1)
 	def empty(self):
-		if not isRealNode(self.root):
+		if not self.root.isRealNode():
 			return True
 		return False
 
@@ -206,9 +205,9 @@ class AVLTreeList(object):
 
 
 	def retrieve(self, i):
-		if (i<0 or i>= length(self)): 
+		if (i<0 or i>= self.length()): 
 			return None
-		return getValue(TreeSelectRec(getRoot(self) ,i+1))
+		return self.getRoot().TreeSelectRec(i+1).getValue()
 	
 	"""retrieves the value of the i'th item in the list
 
@@ -226,14 +225,14 @@ class AVLTreeList(object):
 	#  	return TreeSelectRec(x.left, i)
 	#  else:
 	# 		return TreeSelectRec(x.right, i-r) 
-	def TreeSelectRec(x, i)
-		r = getSize(getLeft(x)) +1
+	def TreeSelectRec(x, i):
+		r = x.getLeft().getSize() +1
 		if i==r:
 			return x
 		elif i<r:
-			return TreeSelectRec(getLeft(x), i)
+			return x.getLeft().TreeSelectRec( i)
 		else:
-			return TreeSelectRec(getRight(x), i-r) 
+			return x.getRight().TreeSelectRec( i-r) 
 
 	"""returns BF
 
@@ -247,7 +246,7 @@ class AVLTreeList(object):
 	#time complexity: O(1) bc its just math
 
 	def getBF(node):
-		return getHight(getLeft(node)) - getHeight(getRight(node))
+		return node.getLeft().getHight() - node.getRight().getHeight()
 
 
 	"""returns predecessor 
@@ -261,13 +260,13 @@ class AVLTreeList(object):
 	# time complexity(log(n))
 
 	def getPredecessor(node):
-		if isRealNode(getLeft(node)):
-			return MaxNode(getLeft(node))
-		y = getParent(node)
-		#לבדוק אולי צריך להוסיף פונצקיית שיווין
-		while (y!= None) and (node == getLeft(y)) :
+		if node.getLeft().isRealNode():
+			return node.getLeft().MaxNode()
+		y = node.getParent()
+		#check if we need to add an equality function
+		while (y!= None) and (node == y.getLeft()) :
 			node = y
-			y = getParent(node)
+			y = node.getParent()
 		return y 
 
 
@@ -283,14 +282,14 @@ class AVLTreeList(object):
 	# time complexity(log(n))
 
 	def getSuccessor(node):
-	if isRealNode(getRight(node)):
-		return MinNode(getRight(node))
-	y = getParent(node)
-	#לבדוק אולי צריך להוסיף פונצקיית שיווין
-	while (y!= None) and (node == getRight(y)) :
-		node = y
-		y= getParent(node)
-	return y
+		if node.getRight().isRealNode():
+			return node.getRight().MinNode()
+		y = node.getParent()
+		#check if we need to add an equality function
+		while (y!= None) and (node == y.getRight()) :
+			node = y
+			y= node.getParent()
+		return y
 
 
 
@@ -329,33 +328,33 @@ class AVLTreeList(object):
 
 
 		#if empty tree, we create new tree
-		if empty(self):
+		if self.empty():
 			self.root = newNode
 			virtualRight = AVLNode(None)
 			virtualLeft = AVLNode(None)
-			setRight(newNode,virtualRight)
-			setLeft(newNode,virtualLeft)
+			newNode.setRight(virtualRight)
+			newNode.setLeft(virtualLeft)
 		#1
 		else:
-			if i==length(self) :
-			#insert last, max has two virtual nodes, we insert in between max and its virtual node
-			#the newNode, than make new leftVirtual to the newNode 
-			max = MaxNode(getRoot(self))
-			virtualLeft = AVLNode(None)
-			virtualRight = getRight(max)
-			setRight(newNode,virtualRight)
-			setLeft(newNode,virtualLeft)
-			setRight(max,newNode)
+			if i==self.length() :
+				#insert last, max has two virtual nodes, we insert in between max and its virtual node
+				#the newNode, than make new leftVirtual to the newNode 
+				max = self.getRoot().MaxNode()
+				virtualLeft = AVLNode(None)
+				virtualRight = max.getRight()
+				newNode.setRight(virtualRight)
+				newNode.setLeft(virtualLeft)
+				max.setRight(newNode)
 			else:
-				currNode = TreeSelectRec(getRoot(self) ,i+1)
-				if not isRealNode(getLeft(currNode)):
+				currNode = self.getRoot().TreeSelectRec(i+1)
+				if not currNode.getLeft().isRealNode():
 					#insert in index i, curr has left virtual nodes, we insert in between curr and its virtual node
 					#the newNode, than make new RightVirtual to the newNode  
-					virtualLeft = getLeft(currNode)
+					virtualLeft = currNode.getLeft()
 					virtualRight = AVLNode(None)
-					setLeft(newNode,virtualLeft)
-					setRight(newNode, virtualRight)
-					setLeft(currNode,newNode)
+					newNode.setLeft(virtualLeft)
+					newNode.setRight(virtualRight)
+					currNode.setLeft(newNode)
 				else:
 					#insert in index i, pre has two virtual nodes, we insert in between pre and its virtual node
 					#the newNode, than make new leftVirtual to the newNode 
@@ -382,7 +381,7 @@ class AVLTreeList(object):
 
 		return balancing_steps
 
-"""decides which types of rotations will take place for insert
+	"""decides which types of rotations will take place for insert
 	@pre: node is real
 	@returns: amount of balancing steps so far
 	"""
@@ -505,9 +504,8 @@ class AVLTreeList(object):
 	"""
 	#We go all the way until we arrive the root
 	#time complexity: O(log(n))
-	def updatePathMeasurements(node, balancing_steps):
-		y = node	
-		while (y!=None):
+	def updatePathMeasurements(node, balancing_steps):	
+		while (node!=None):
 			#update hight
 			lefthight= getHight(getRight(node))
 			righthight = getHight(getLeft(node))
@@ -566,112 +564,141 @@ class AVLTreeList(object):
 			return -1
 
 		balancing_steps = 0 #how many balancing steps we made
-		node = TreeSelectRec(getRoot(self), i)
-
-		if node == self.getRoot():  #0
-			#insert code here
-		else:
-
-			children = 0				#checks how many children, and if so, which one is it (left T or F)
-			hasLeft = False
-			if isRealNode(getLeft(node)):
-				children+=1
-				hasLeft = True
-			if isRealNode(getRight(node)):
-				children+=1
+		node = self.getRoot().TreeSelectRec( i+1)
 
 
-			y = getParent(node) 					#2		
+		children = 0				#checks how many children, and if so, which one is it (left T or F)
+		hasLeft = False
+		if isRealNode(getLeft(node)):
+			children+=1
+			hasLeft = True
+		if isRealNode(getRight(node)):
+			children+=1
 
-			if children == 0: 										#1.case_1   		
-				if is_left_child(node):
-					setParent(getLeft(node), y)
-					setLeft(y, getLeft(node))
-					#AVLdelete(node)  gotta create this
-				else:
+		if node != self.getRoot():					#set y as parent only if it has a parent: we have special check for root in case 3
+			y = node.getParent() 					#2		
+
+		if children == 0: 											#1.case_1   	
+			if node == self.getRoot():
+				virtual_root = node.getRight()
+				virtual_root.setParent(None)
+				self.root = virtual_root
+				return balancing_steps
+
+			if node.is_left_child():
+				node.getLeft().setParent( y)
+				y.setLeft( node.getLeft())
+				node.AVLdelete()
+			else:
+				node.getRight().setParent( y)
+				y.setRight(node.getRight())
+				node.AVLdelete()  
+
+		elif children == 1:											#1.case_2
+			
+			if hasLeft: 
+				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for hight or size updates, just make it the root
+					new_root = node.getLeft()
+					new_root.setParent(None)
+					self.root = new_root
+					node.AVLdelete()
+					return balancing_steps
+
+				if node.is_left_child(): 							#has left child and is left child
+					node.getLeft().setParent( y)
+					y.setLeft( node.getLeft())
+					node.AVLdelete()  
+				else:												#has left child and is right child
+					node.getLeft().setParent( y)
+					y.setRight( node.getLeft())
+					node.AVLdelete() 
+
+			else:
+				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for hight or size updates, just make it the root
+					new_root = node.getRight()
+					new_root.setParent(None)
+					self.root = new_root
+					node.AVLdelete()
+					return balancing_steps	
+
+				if node.is_left_child():								 #has right child and is left child
+					node.getRight().setParent( y)
+					y.setLeft( node.getRight())
+					node.AVLdelete()  
+				else:												#has right child and is right child
 					setParent(getRight(node), y)
 					setRight(y, getRight(node))
-					#AVLdelete(node)  gotta create this
+					node.AVLdelete()  
 
-			elif children == 1:											#1.case_2
-				if hasLeft: 
-					if is_left_child(node): 							#has left child and is left child
-						setParent(getLeft(node), y)
-						setLeft(y, getLeft(node))
-						#AVLdelete(node)  gotta create this
-					else:												#has left child and is right child
-						setParent(getLeft(node), y)
-						setRight(y, getLeft(node))
-						#AVLdelete(node)  gotta create this
+		else:															#1.case_3
+																					
+			successor = node.getSuccessor()
+			y = getParent(successor)  									#because of successor being deleted node in terms of shape, we start fixing here
+			setParent(getRight(successor), getParent(successor))		#successor ALWAYS has right child and is left child
+			setLeft(getParent(successor), getRight(successor))
 
-				else:													 
-					if is_left_child(node):								 #has right child and is left child
-						setParent(getRight(node), y)
-						setLeft(y, getRight(node))
-						#AVLdelete(node)  gotta create this
-					else:												#has right child and is right child
-						setParent(getRight(node), y)
-						setRight(y, getRight(node))
-						#AVLdelete(node)  gotta create this
 
-			else:															#1.case_3
-																						
-				successor = getSuccessor(node)
-				y = getParent(successor)  									#because of successor being deleted node in terms of shape, we start fixing here
-				setParent(getRight(successor), getParent(successor))		#successor ALWAYS has right child and is left child
-				setLeft(getParent(successor), getRight(successor))
+			setParent(successor, getParent(node))     					  #steal node's parent
 
-				setParent(successor, getParent(node))     					  #steal node's parent
-				if is_left_child(node):
-					setLeft(getParent(successor), successor)
-				else:
-					setRight(getParent(successor), successor)
+			if node == self.root():
+				self.root = successor
 
-				setRight(successor, getRight(node))							#steal node's right child
-				setParent(getRight(successor), successor)
+			elif is_left_child(node):
+				setLeft(getParent(successor), successor)
+			else:
+				setRight(getParent(successor), successor)
 
+			setRight(successor, getRight(node))							#steal node's right child
+			setParent(getRight(successor), successor)
+
+			if node.size != 3:
 				setLeft(successor, getLeft(node))							#steal node's left child
 				setParent(getLeft(successor), successor)
-				
-				#AVLdelete(node)  gotta create this
 			
-			########## done with 1 and 2 ####################
-			########## start 3 ##############################
-
-			balancing_steps = updatePathMeasurements(y, balancing_steps) #update size and hight and balancing_steps
-				
-				
-			while (isRealNode(y)) and (y!=None):
-				if abs(getBF(y)) < 2 :
-					if not getHightUpdate(y):
-						break
-					else:
-						y = getParent(y)
-				else: #getBF(y)=2
-					balancing_steps = ImplementRotation(self, y, balancing_steps)
-					y = getParent(y)
-
-			return balancing_steps	
 			
-
-
-
-
-
-				
-
-
-
-
-				
-
-
+			node.AVLdelete()
 		
-"""returns bool if node is left child
-	@pre: node has parent
-	@rtype: bool
-	@returns: returns true if node is left child
+		########## done with 1 and 2 ####################
+		########## start 3 ##############################
+
+		balancing_steps = y.updatePathMeasurements(balancing_steps) #update size and hight and balancing_steps
+			
+			
+		balancing_steps = self.delete_style_balancing(y, balancing_steps)
+
+		return balancing_steps	
+			
+
+	def delete_style_balancing(self, node, balancing_steps):
+		while (isRealNode(node)) and (node!=None):
+			if abs(getBF(node)) < 2 :
+				if not getHightUpdate(node):
+					break
+				else:
+					node = getParent(node)
+			else: #getBF(y)=2
+				balancing_steps = self.ImplementRotation(node, balancing_steps)
+				node = node.getParent()
+
+		return balancing_steps
+
+
+	""" 'deletes' node by stripping it of all pointers
+	@type node: AVLNode
+	@param node: a node
 	"""
+	#time complexity: O(1)
+	def AVLdelete(node):
+		node.setParent(None)
+		node.setRight(None)
+		node.setLeft(None)
+		
+	"""returns bool if node is left child
+		@pre: node has parent
+		@rtype: bool
+		@returns: returns true if node is left child
+		"""
+
 	def is_left_child(node):
 		if node == getLeft(getParent(node)):
 			return True 
@@ -749,15 +776,17 @@ class AVLTreeList(object):
 
 	def listToArray(self):
 		result = []
+		
+		def listtoArray_rec(node):
+			if isRealNode(node):
+				listtoArray_rec(getLeft(node))
+				result.append(getValue(node))
+				listtoArray_rec(getRight(node))
 
-        def listtoArray_rec(node):
-            if isRealNode(node):
-                listtoArray_rec(getLeft(node))
-                result.append(getValue(node))
-                listtoArray_rec(getRight(node))
+		#check that global/local variables are not an issue
 
-       	listtoArray_rec(self.root)
-        return result
+		listtoArray_rec(self.root)
+		return result
 
 	"""returns the size of the list 
 
@@ -790,10 +819,87 @@ class AVLTreeList(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 	def concat(self, lst):
+		hight_difference = abs(self.root.getHeight() - lst.root.getHeight())
+
 		return None
 
-	"""searches for a *value* in the list
 
+	"""joins two trees given a middle index x
+	@preL T1 and T2 are trees, x is a real node
+	@type T1 & T2: AVLTreeList
+	@type x: AVLNode
+	@param T2: a list to be joined to T1 using x as join spot
+	@rtype: joined AVLTree
+	@returns: the tree formed by T1 T2 and x
+	"""
+	def AVL_join(T1, T2, x):
+
+		def join(small_tree, big_tree, x, is_equal): #joins given that small_tree <= big_tree
+
+			right_join_node = big_tree.root
+
+			while right_join_node.getHeight() > small_tree.root.getHeight():
+				right_join_node = right_join_node.getLeft()
+
+			def has_left_child(node):
+				if node.getLeft().isRealNode():
+					return True
+				return False 
+
+			if not is_equal:
+				right_join_node = right_join_node.getParent()
+
+				if has_left_child(right_join_node):
+					right_join_node = right_join_node.getLeft()
+				else:
+					right_join_node = right_join_node.getRight()
+
+			x.setLeft(small_tree.root)
+			x.setRight(right_join_node)
+
+			if not is_equal:
+				x.setParent(right_join_node.getParent())
+
+				x.getParent.setLeft(x)
+
+				if x.getParent.getRight() == right_join_node: #in case right child of parent points to rightjoinnode, got to get rid of pointer
+					virtual_node = AVLNode(None)
+					x.getParent.setRight(virtual_node)
+			else:
+				big_tree.root = x
+			
+			small_tree.root.setParent(x)
+			right_join_node.setParent(x)
+
+			virtual_node = AVLNode(None) #gets rid of small tree as a class, now we only have one real tree: big tree
+			small_tree.root = virtual_node
+			
+			x.updatePathMeasurements(0) #we dont need balancing steps info, so we put bs number
+
+			big_tree.delete_style_balancing(x, 0)
+
+			return big_tree
+
+
+		T1height = T1.root.getHeight()
+		T2Height = T2.root.getHeight()
+
+		if T1height < T2Height:
+			return join(T1, T2, x, False)
+		elif T1height > T2Height:
+			return join(T2,T1, x, False)
+		else:
+			return join(T1, T2, x, True)
+
+		
+
+
+		
+
+			
+
+	
+	"""searches for a *value* in the list
 	@type val: str
 	@param val: a value to be searched
 	@rtype: int
@@ -807,19 +913,19 @@ class AVLTreeList(object):
 	def search(self, val):
 		culprit = None
 		found = False
-		def search_rec(node, val)
+		def search_rec(node, val):
 			if found:
 				return
-			if isRealNode(node, value):
-         	    search_rec(getLeft(node))
+			if node.isRealNode(val):
+				search_rec(node.getLeft())
 				if found:
 					return
-          	    elif getValue(node) == val:
+				elif node.getValue() == val:
 					found = True
 					culprit = node
 					return
 				else:
-					search_rec(getRight(node))
+					search_rec(node.getRight())
 		search_rec(getRoot(self), val)
 		if not found:
 			return -1
@@ -827,7 +933,7 @@ class AVLTreeList(object):
 			return tree_rank(culprit)
 
 
-"""returns index of node
+	"""returns index of node
 	@type node: AVLNode
 	@param node: node who's index must be found
 	@rtype: int
@@ -855,8 +961,8 @@ class AVLTreeList(object):
 	#if the list isnt empty then we can return a root
 	# O(1) since empty is O(1)
 	def getRoot(self):
-		if not empty(self):
-			return getValue(self.root)
+		if not self.empty():
+			return self.root.getValue()
 		return None
 
 
