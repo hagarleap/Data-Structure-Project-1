@@ -671,8 +671,8 @@ class AVLTreeList(object):
 
 	def delete_style_balancing(self, node, balancing_steps):
 		while (node.isRealNode()) and (node!=None):
-			if abs(getBF(node)) < 2 :
-				if not getHightUpdate(node):
+			if abs(node.getBF()) < 2 :
+				if not node.getHightUpdate():
 					break
 				else:
 					node = node.getParent()
@@ -930,7 +930,7 @@ class AVLTreeList(object):
 		if not found:
 			return -1
 		else:
-			return tree_rank(culprit)
+			return culprit.tree_rank()
 
 
 	"""returns index of node
