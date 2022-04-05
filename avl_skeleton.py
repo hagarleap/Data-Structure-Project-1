@@ -644,7 +644,7 @@ class AVLTreeList(object):
 				self.root = successor
 
 			elif is_left_child(node):
-				setLeft(getParent(successor), successor)
+				setLeft(successor.getParent(), successor)
 			else:
 				setRight(getParent(successor), successor)
 
@@ -670,12 +670,12 @@ class AVLTreeList(object):
 			
 
 	def delete_style_balancing(self, node, balancing_steps):
-		while (isRealNode(node)) and (node!=None):
+		while (node.isRealNode()) and (node!=None):
 			if abs(getBF(node)) < 2 :
 				if not getHightUpdate(node):
 					break
 				else:
-					node = getParent(node)
+					node = node.getParent()
 			else: #getBF(y)=2
 				balancing_steps = self.ImplementRotation(node, balancing_steps)
 				node = node.getParent()
@@ -700,7 +700,7 @@ class AVLTreeList(object):
 		"""
 
 	def is_left_child(node):
-		if node == getLeft(getParent(node)):
+		if node == node.getParent().getLeft():
 			return True 
 		return False
 
@@ -716,9 +716,9 @@ class AVLTreeList(object):
 		if self.empty():
 			return None
 		node = self.root
-		while isRealNode(getLeft(node)): 
-			node = getLeft(node)
-		return getValue(node)
+		while node.getLeft().isRealNode(): 
+			node = node.getLeft()
+		return node.getValue()
 
 	"""returns the value of the last item in the list
 
@@ -732,9 +732,9 @@ class AVLTreeList(object):
 		if self.empty():
 			return None
 		node = self.root
-		while isRealNode(getRight(node)): 
-			node = getRight(node)
-		return getValue(node)
+		while node.getRight().isRealNode(): 
+			node =node.getRight()
+		return node.getValue()
 
 
 	"""given a certain node and returns the min node
@@ -745,8 +745,8 @@ class AVLTreeList(object):
 	#We go all the way left until we arrive at a virtual node
 	#time complexity: O(log(n))
 	def MinNode(node):
-		while isRealNode(getLeft(node)): 
-			node = getLeft(node)
+		while node.getLeft().isRealNode(): 
+			node = node.getLeft()
 		return node	
 
 	"""given a certain node and returns the max node
@@ -757,8 +757,8 @@ class AVLTreeList(object):
 	#We go all the way right until we arrive at a virtual node
 	#time complexity: O(log(n))
 	def MaxNode(node):
-		while isRealNode(getRight(node)): 
-			node = getRight(node)
+		while node.getRight().isRealNode(): 
+			node = node.getRight()
 		return node	
 
 
@@ -778,10 +778,10 @@ class AVLTreeList(object):
 		result = []
 		
 		def listtoArray_rec(node):
-			if isRealNode(node):
-				listtoArray_rec(getLeft(node))
-				result.append(getValue(node))
-				listtoArray_rec(getRight(node))
+			if node.isRealNode():
+				listtoArray_rec(node.getLeft())
+				result.append(node.getValue())
+				listtoArray_rec(node.getRight())
 
 		#check that global/local variables are not an issue
 
@@ -797,7 +797,7 @@ class AVLTreeList(object):
 	#time complexity: O(1)
 
 	def length(self):
-		return getSize(self.root)
+		return self.root.getSize()
 
 	"""splits the list at the i'th index
 
@@ -926,7 +926,7 @@ class AVLTreeList(object):
 					return
 				else:
 					search_rec(node.getRight())
-		search_rec(getRoot(self), val)
+		search_rec(self.getRoot(), val)
 		if not found:
 			return -1
 		else:
@@ -943,12 +943,12 @@ class AVLTreeList(object):
 	#time complexity: log(n)
 
 	def Tree_rank(node):
-		r = getSize(getLeft(node)) + 1
+		r = node.getLeft().getSize() + 1
 		
-		while isRealNode(node):
-			if node == getRight(getParent(node)): #if node is right son
-				r = r + getSize(getLeft(getParent(node))) + 1
-			node = getParent(node)
+		while node.isRealNode():
+			if node == node.getParent().getRight(): #if node is right son
+				r = r + node.getParent().getLeft().getSize() + 1
+			node = node.getParent()
 		return r
 
 
