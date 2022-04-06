@@ -358,25 +358,25 @@ class AVLTreeList(object):
 				else:
 					#insert in index i, pre has two virtual nodes, we insert in between pre and its virtual node
 					#the newNode, than make new leftVirtual to the newNode 
-					preNode = getPredecessor(currNode)
+					preNode = currNode.getPredecessor(currNode)
 					virtualLeft = AVLNode(None)
-					virtualRight = getRight(preNode)
-					setRight(newNode,virtualRight)
-					setLeft(newNode,virtualLeft)
-					setRight(preNode,newNode)
+					virtualRight = preNode.getRight()
+					newNode.setRight(virtualRight)
+					newNode.setLeft(virtualLeft)
+					preNode.setRight(newNode)
 					
 
-			balancing_steps = updatePathMeasurements(newNode, balancing_steps) #update size and hight and balancing_steps
+			balancing_steps = newNode.updatePathMeasurements( balancing_steps) #update size and hight and balancing_steps
 			#2
-			y = getParent(newNode)
-			while (isRealNode(y)) and (y!=None):
-				if abs(getBF(y)) < 2 :
-					if not getHightUpdate(y):
+			y = newNode.getParent()
+			while (y.isRealNode()) and (y!=None):
+				if abs(y.getBF()) < 2 :
+					if not y.getHightUpdate():
 						break
 					else:
-						y = getParent(y)
+						y = y.getParent()
 				else: #getBF(y)=2
-					balancing_steps = ImplementRotation(self, y, balancing_steps)
+					balancing_steps = self.ImplementRotation( y, balancing_steps)
 					break
 
 		return balancing_steps
@@ -404,25 +404,25 @@ class AVLTreeList(object):
 
 	def ImplementRotation(self, node, balancing_steps):
 
-		if getBF(node) == -2:
+		if node.getBF() == -2:
 
-			if  getBF(getRight(node)) ==-1 or getBF(getRight(node)) ==0:    #child BF == -1 or 0
-				LeftRotation(self,node)
+			if  node.getRight().getBF() ==-1 or node.getRight().getBF() ==0:    #child BF == -1 or 0
+				self.LeftRotation(node)
 				balancing_steps += 1
 
 			else:															#child BF == +1
-				RightRotation(self,getRight(node))
-				LeftRotation(self,node)
+				self.RightRotation(node.getRight())
+				self.LeftRotation(node)
 				balancing_steps+=2
 		else:
 
-			if getBF(getLeft(node)) == 1 or getBF(getLeft(node)) == 0: 		#child BF == +1 or 0
-				RightRotation(self,node)
+			if node.getLeft().getBF() == 1 or node.getLeft().getBF() == 0: 		#child BF == +1 or 0
+				self.RightRotation(node)
 				balancing_steps+=1
 
 			else: 															#child BF == -1
-				LeftRotation(self,getLeft(node))
-				RightRotation(self,node)
+				self.LeftRotation(node.getLeft())
+				self.RightRotation(node)
 				balancing_steps+=2
 
 		return balancing_steps
@@ -437,28 +437,28 @@ class AVLTreeList(object):
 	def RightRotation(self, B):
 		B_is_root=False
 
-		if getParent(B) == None: ##if none then B is root
+		if B.getParent() == None: ##if none then B is root
 			B_is_root = True
 
-		A = getLeft(B)
-		setLeft(B, getRight(A))
-		setParent(getLeft(B), B)
-		setRight(A,B)
+		A = B.getLeft()
+		B.setLeft(A.getRight())
+		B.getLeft().setParent( B)
+		A.setRight(B)
 		if B_is_root:
 			self.root = A
 
 		else:	
-			setParent(A, getParent(B))
-			if is_left_child(B):
-				setLeft(getParent(A), A)
+			A.setParent(B.getParent())
+			if B.is_left_child():
+				A.getParent().setLeft( A)
 			else:
-				setRight(getParent(A), A)
+				A.getParent().setRight( A)
 
-		setParent(B, A)
+		B.setParent( A)
 
-		setHeight(B, max(getHeight(getLeft(B)), getHeight(getRight(B))) + 1 )
-		setSize(B, getSize(getLeft(B)) + getSize(getRight(B)) + 1 )
-		setSize(A, getSize(getLeft(A)) + getSize(getRight(A)) + 1 )
+		B.setHeight( max(B.getLeft().getHeight(), B.getRight().getHeight()) + 1 )
+		B.setSize( B.getLeft().getSize() + B.getRight().getSize() + 1 )
+		A.setSize(A.getLeft().getSize() + A.getRight().getSize() + 1 )
 
 	"""does right rotation on given node
 	@pre: node is real
@@ -469,28 +469,28 @@ class AVLTreeList(object):
 	def LeftRotation(self, B):
 		B_is_root=False
 
-		if B == getRoot(self):
+		if B == self.getRoot():
 			B_is_root = True
 
-		A = getRight(B)
-		setRight(B, getLeft(A))
-		setParent(getRight(B), B)
-		setLeft(A,B)
+		A = B.getRight()
+		B.setRight(A.getLeft())
+		B.getRight().setParent( B)
+		A.setLeft(B)
 		if B_is_root:
 			self.root = A
 
 		else:	
-			setParent(A, getParent(B))
-			if is_left_child(B):
-				setLeft(getParent(A), A)
+			A.setParent(B.getParent())
+			if B.is_left_child():
+				A.getParent().setLeft( A)
 			else:
-				setRight(getParent(A), A)
+				A.getParent().setRight( A)
 
-		setParent(B, A)
+		B.setParent(A)
 
-		setHeight(B, max(getHeight(getLeft(B)), getHeight(getRight(B))) + 1 )
-		setSize(B, getSize(getLeft(B)) + getSize(getRight(B)) + 1 )
-		setSize(A, getSize(getLeft(A)) + getSize(getRight(A)) + 1 )
+		B.setHeight( max(B.getLeft().getHeight(), B.getRight().getHeight()) + 1 )
+		B.setSize( B.getLeft().getSize() + B.getRight().getSize() + 1 )
+		A.setSize(A.getLeft().getSize() + A.getRight().getSize() + 1 )
 
 
 
@@ -507,23 +507,24 @@ class AVLTreeList(object):
 	def updatePathMeasurements(node, balancing_steps):	
 		while (node!=None):
 			#update hight
-			lefthight= getHight(getRight(node))
-			righthight = getHight(getLeft(node))
+			oldHight = node.getHight()
+			lefthight= node.getRight().getHight()
+			righthight = node.getLeft().getHight()
 			newhight = max(lefthight, righthight)+1
 			if (oldHight==newhight): #y hight hasn't changed
-				setHightUpdate(node,False)
+				node.setHightUpdate(False)
 			else:	
-				setHeight(node,newhight)
-				setHightUpdate(node,True)
+				node.setHeight(newhight)
+				node.setHightUpdate(True)
 				balancing_steps += 1
 
 			#update size
-			rightsize = getSize(getRight(node))
-			leftsize  = getSize(getLeft(node))
+			rightsize = node.getRight().getSize()
+			leftsize  = node.getLeft().getSize()
 			newsize = rightsize + leftsize + 1
-			setSize(node,newsize)
+			node.setSize(newsize)
 			#go to the parent until you arive the root
-			y = getParent(node)
+			y = node.getParent()
 
 			return balancing_steps
 
@@ -569,10 +570,10 @@ class AVLTreeList(object):
 
 		children = 0				#checks how many children, and if so, which one is it (left T or F)
 		hasLeft = False
-		if isRealNode(getLeft(node)):
+		if node.getLeft().isRealNode():
 			children+=1
 			hasLeft = True
-		if isRealNode(getRight(node)):
+		if node.getRight().isRealNode():
 			children+=1
 
 		if node != self.getRoot():					#set y as parent only if it has a parent: we have special check for root in case 3
@@ -626,34 +627,34 @@ class AVLTreeList(object):
 					y.setLeft( node.getRight())
 					node.AVLdelete()  
 				else:												#has right child and is right child
-					setParent(getRight(node), y)
-					setRight(y, getRight(node))
+					node.getRight().setParent( y)
+					y.setRight( node.getRight())
 					node.AVLdelete()  
 
 		else:															#1.case_3
 																					
 			successor = node.getSuccessor()
-			y = getParent(successor)  									#because of successor being deleted node in terms of shape, we start fixing here
-			setParent(getRight(successor), getParent(successor))		#successor ALWAYS has right child and is left child
-			setLeft(getParent(successor), getRight(successor))
+			y = successor.getParent()  									#because of successor being deleted node in terms of shape, we start fixing here
+			successor.getRight().setParent( successor.getParent())		#successor ALWAYS has right child and is left child
+			successor.getParent().setLeft(successor.getRight())
 
 
-			setParent(successor, getParent(node))     					  #steal node's parent
+			successor.setParent(node.getParent())     					  #steal node's parent
 
 			if node == self.root():
 				self.root = successor
 
-			elif is_left_child(node):
-				setLeft(successor.getParent(), successor)
+			elif node.is_left_child():
+				successor.getParent().setLeft( successor)
 			else:
-				setRight(getParent(successor), successor)
+				successor.getParent().etRight( successor)
 
-			setRight(successor, getRight(node))							#steal node's right child
-			setParent(getRight(successor), successor)
+			successor.setRight( node.getRight())							#steal node's right child
+			successor.getRight().setParent( successor)
 
 			if node.size != 3:
-				setLeft(successor, getLeft(node))							#steal node's left child
-				setParent(getLeft(successor), successor)
+				successor.setLeft( node.getLeft())							#steal node's left child
+				successor.getLeft().setParent(successor)
 			
 			
 			node.AVLdelete()
