@@ -54,4 +54,8 @@ split , concat
 checking everything to see it works
 לעבור על הדף שגיאות של סמסטר קודם ולתקן בקוד שלנו
 
+07/04
+finished all code
+next meeting: DEBUG LIKE OUR LIFE DEPENDS ON IT
+
 
