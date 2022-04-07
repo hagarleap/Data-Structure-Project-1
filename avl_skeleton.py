@@ -8,6 +8,7 @@
 
 """A class represnting a node in an AVL tree"""
 
+from hashlib import new
 from logging import root
 
 
@@ -178,6 +179,8 @@ class AVLTreeList(object):
 
 	def __init__(self):
 		self.root = AVLNode(self, None)
+		self.min = self.root
+		self.max = self.root
 		# add your fields here
 
 
@@ -329,6 +332,10 @@ class AVLTreeList(object):
 		newNode = AVLNode(val)
 		balancing_steps = 0 #counting how many fixes to hight and rotations
 
+		if i==0 :           #upadate min and max
+			self.min = newNode
+		if i==self.length():
+			self.max = newNode
 
 		#if empty tree, we create new tree
 		if self.empty():
@@ -342,7 +349,7 @@ class AVLTreeList(object):
 			if i==self.length() :
 				#insert last, max has two virtual nodes, we insert in between max and its virtual node
 				#the newNode, than make new leftVirtual to the newNode 
-				max = self.getRoot().MaxNode()
+				max = self.max
 				virtualLeft = AVLNode(None)
 				virtualRight = max.getRight()
 				newNode.setRight(virtualRight)
@@ -564,6 +571,8 @@ class AVLTreeList(object):
 
 	def delete(self, i):
 
+	
+
 		if i>= self.length() or i<0: #check that list isnt empty
 			return -1
 
@@ -582,11 +591,13 @@ class AVLTreeList(object):
 		if node != self.getRoot():					#set y as parent only if it has a parent: we have special check for root in case 3
 			y = node.getParent() 					#2		
 
-		if children == 0: 											#1.case_1   	
-			if node == self.getRoot():
+		if children == 0: 											#1.case_1  	
+			if node == self.getRoot(): #only one node-root in the tree
 				virtual_root = node.getRight()
 				virtual_root.setParent(None)
 				self.root = virtual_root
+				self.min = self.root  #update min and max
+				self.max = self.root
 				return balancing_steps
 
 			if node.is_left_child():
@@ -605,6 +616,8 @@ class AVLTreeList(object):
 					new_root = node.getLeft()
 					new_root.setParent(None)
 					self.root = new_root
+					self.min = self.root  #update min and max
+					self.max = self.root
 					node.AVLdelete()
 					return balancing_steps
 
@@ -622,6 +635,8 @@ class AVLTreeList(object):
 					new_root = node.getRight()
 					new_root.setParent(None)
 					self.root = new_root
+					self.min = self.root  #update min and max
+					self.max = self.root
 					node.AVLdelete()
 					return balancing_steps	
 
@@ -641,6 +656,11 @@ class AVLTreeList(object):
 			successor.getRight().setParent( successor.getParent())		#successor ALWAYS has right child and is left child
 			successor.getParent().setLeft(successor.getRight())
 
+			#update min and max
+			if (i==0):
+				self.min = successor
+			elif (i == self.length-1):
+				self.max = node.getPredecessor()
 
 			successor.setParent(node.getParent())     					  #steal node's parent
 
@@ -713,16 +733,13 @@ class AVLTreeList(object):
 	@rtype: str
 	@returns: the value of the first item, None if the list is empty
 	"""
-	#We go all the way left until we arrive at a virtual node
-	#time complexity: O(log(n))
+	#We have a pointer to the min node
+	#time complexity: O(1)
 
 	def first(self):
 		if self.empty():
 			return None
-		node = self.root
-		while node.getLeft().isRealNode(): 
-			node = node.getLeft()
-		return node.getValue()
+		return self.min.getValue()
 
 	"""returns the value of the last item in the list
 
@@ -735,10 +752,7 @@ class AVLTreeList(object):
 	def last(self):
 		if self.empty():
 			return None
-		node = self.root
-		while node.getRight().isRealNode(): 
-			node =node.getRight()
-		return node.getValue()
+		return self.max.getValue()
 
 
 	"""given a certain node and returns the min node
@@ -819,6 +833,11 @@ class AVLTreeList(object):
 		x = self.root.TreeSelectRec(i)
 		val_x = x.getValue()
 
+		if i!= 0 :
+			small_tree_max = x.getPredecessor()
+		if i!= self.length()-1:
+			large_tree_min = x.getSuccessor()
+
 		small_tree = AVLTreeList()  #initaize small tree with x left child subtree
 		small_tree.root = x.geLeft()
 		small_tree.root.setParent(None)
@@ -845,7 +864,7 @@ class AVLTreeList(object):
 			#join (y.get Left as a tree - temp, y, small_tree)
 			#we need to save come_from_left for next itertion before join
 			#we need to cut y from the tree 
-			
+
 			z = y.getParent()
 
 			if come_from_left:
@@ -879,6 +898,11 @@ class AVLTreeList(object):
 
 			y = z  #go up to the parent
 			
+		
+		if i!= 0 :
+			small_tree.max = small_tree_max 
+		if i!= self.length()-1:
+			large_tree.min = large_tree_min 
 
 		return [small_tree ,val_x, large_tree]
 
@@ -893,7 +917,7 @@ class AVLTreeList(object):
 		hight_difference = abs(self.root.getHeight() - lst.root.getHeight())
 
 		if not self.empty() :
-			val_x = self.getRoot().MaxNode() # val of last node in self
+			val_x = self.max.getValue() # val of last node in self
 			x = AVLNode(val_x) #craate new node x
 			last_index = self.length()
 			self.delete(last_index)
@@ -996,12 +1020,18 @@ class AVLTreeList(object):
 		else:
 			T1height = T1.root.getHeight()
 			T2Height = T2.root.getHeight()
-			
+
+			T2.min = T1.min		#update min and max
+			T1.max = T2.max
+
 			if T1height < T2Height:
+				
 				return join(T1, T2, x, False, True)  #small_tree_first = true
 			elif T1height > T2Height:
+				
 				return join(T2,T1, x, False, False)  #small_tree_first = false
 			else:
+				
 				return join(T1, T2, x, True, True)  #save order 
 
 		
