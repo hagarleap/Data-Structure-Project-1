@@ -8,6 +8,9 @@
 
 """A class represnting a node in an AVL tree"""
 
+from logging import root
+
+
 class AVLNode(object):
 	"""Constructor, you are allowed to add more fields. 
 
@@ -215,7 +218,7 @@ class AVLTreeList(object):
 	@pre: 1 <= i < self.length()
 	@param i: index in the list
 	@rtype: node
-	@returns: the the node of the i'th item in the list
+	@returns:  the node of the i'th item in the list
 	"""
 	# pseudo code TreeSelectRec(x, i)
 	# r = x.left.size +1
@@ -526,7 +529,7 @@ class AVLTreeList(object):
 			#go to the parent until you arive the root
 			y = node.getParent()
 
-			return balancing_steps
+		return balancing_steps
 
 		
 
@@ -809,8 +812,75 @@ class AVLTreeList(object):
 	@returns: a list [left, val, right], where left is an AVLTreeList representing the list until index i-1,
 	right is an AVLTreeList representing the list from index i+1, and val is the value at the i'th index.
 	"""
+
+	#find node in place i, than go up to the root and join bigger subtrees to Large tree, and smaller subtrees to Small Tree
 	def split(self, i):
-		return None
+
+		x = self.root.TreeSelectRec(i)
+		val_x = x.getValue()
+
+		small_tree = AVLTreeList()  #initaize small tree with x left child subtree
+		small_tree.root = x.geLeft()
+		small_tree.root.setParent(None)
+
+		large_tree = AVLTreeList() #initaize large tree with x right child subtree
+		large_tree.root = x.getRight()
+		large_tree.root.setParent(None)
+		
+		
+		y = x.getParent()
+
+		if x.is_left_child :
+			come_from_left = True
+		else:
+			come_from_left = False
+
+		x.AVLdelete()
+
+		while (y != None):  #go from x to the root
+			#if come from left:  we join red trees
+			#join (large_tree, y, y.getRight - as a tree- temp)
+
+			#if come from left== false:  we join yellow trees
+			#join (y.get Left as a tree - temp, y, small_tree)
+			#we need to save come_from_left for next itertion before join
+			#we need to cut y from the tree 
+			
+			z = y.getParent()
+
+			if come_from_left:
+
+				if y != self.root:
+					if y.is_left_child :
+						come_from_left = True
+					else:
+						come_from_left = False
+
+				temp_bigger_tree =  AVLTreeList()
+				temp_bigger_tree.root = y.getRight()
+				temp_bigger_tree.root.setParent(None)
+				
+			
+				large_tree = large_tree.AVL_join( y , temp_bigger_tree)
+
+			else:  
+
+				if y != self.root:
+					if y.is_left_child :
+						come_from_left = True
+					else:
+						come_from_left = False
+				
+				temp_smaller_tree =  AVLTreeList()
+				temp_smaller_tree = y.getLeft()
+				temp_smaller_tree.root.setParent(None)
+
+				small_tree = temp_smaller_tree.AVL_join( y , small_tree )
+
+			y = z  #go up to the parent
+			
+
+		return [small_tree ,val_x, large_tree]
 
 	"""concatenates lst to self
 
@@ -822,7 +892,18 @@ class AVLTreeList(object):
 	def concat(self, lst):
 		hight_difference = abs(self.root.getHeight() - lst.root.getHeight())
 
-		return None
+		if not self.empty() :
+			val_x = self.getRoot().MaxNode() # val of last node in self
+			x = AVLNode(val_x) #craate new node x
+			last_index = self.length()
+			self.delete(last_index)
+			
+			self.AVL_join(lst ,x)
+
+		else:
+			selfroot = lst.root  #we have only one list
+			
+		return hight_difference
 
 
 	"""joins two trees given a middle index x
@@ -835,62 +916,93 @@ class AVLTreeList(object):
 	"""
 	def AVL_join(T1, T2, x):
 
-		def join(small_tree, big_tree, x, is_equal): #joins given that small_tree <= big_tree
+		def join(small_tree, big_tree, x, is_equal , small_tree_first): #joins given that small_tree <= big_tree
+			join_node = big_tree.root
 
-			right_join_node = big_tree.root
+			if (small_tree_first):  
+				while join_node.getHeight() > small_tree.root.getHeight(): #find the area of the join node
+					join_node = join_node.getLeft()
 
-			while right_join_node.getHeight() > small_tree.root.getHeight():
-				right_join_node = right_join_node.getLeft()
+			else:
+				while join_node.getHeight() > small_tree.root.getHeight(): #find the area of the join node
+					join_node = join_node.getRight()	
+				  
 
 			def has_left_child(node):
 				if node.getLeft().isRealNode():
 					return True
 				return False 
+			
+			def has_right_child(node):
+				if node.getRight().isRealNode():
+					return True
+				return False
 
-			if not is_equal:
-				right_join_node = right_join_node.getParent()
-
-				if has_left_child(right_join_node):
-					right_join_node = right_join_node.getLeft()
+			if not is_equal:   #find the legal join node
+				join_node = join_node.getParent()
+				if (small_tree_first):
+					if has_left_child(join_node):
+						join_node = join_node.getLeft()
+					else:
+						join_node = join_node.getRight()
 				else:
-					right_join_node = right_join_node.getRight()
+					if has_right_child(join_node):
+						join_node = join_node.getRight()
+					else:
+						join_node = join_node.getLeft()
 
-			x.setLeft(small_tree.root)
-			x.setRight(right_join_node)
 
-			if not is_equal:
-				x.setParent(right_join_node.getParent())
+			
+			if (small_tree_first):  #pointers for x for all cases (also in Isequael == TRUE)
+				x.setLeft(small_tree.root)
+				x.setRight(join_node)
+			else:
+				x.setRight(small_tree.root)
+				x.setLeft(join_node)
 
-				x.getParent.setLeft(x)
 
-				if x.getParent.getRight() == right_join_node: #in case right child of parent points to rightjoinnode, got to get rid of pointer
-					virtual_node = AVLNode(None)
-					x.getParent.setRight(virtual_node)
+			if not is_equal:               
+				x.setParent(join_node.getParent())
+				if (small_tree_first): 
+					x.getParent.setLeft(x)
+					if x.getParent.getRight() ==join_node: #in case right child of parent points to joinnode, got to get rid of pointer
+						virtual_node = AVLNode(None)
+						x.getParent.setRight(virtual_node)
+				else:
+					x.getParent.setRight(x)
+					if x.getParent.getLeft() ==join_node: #in case left child of parent points to joinnode, got to get rid of pointer
+						virtual_node = AVLNode(None)
+						x.getParent.setLeft(virtual_node)
 			else:
 				big_tree.root = x
 			
 			small_tree.root.setParent(x)
-			right_join_node.setParent(x)
+			join_node.setParent(x)
 
-			virtual_node = AVLNode(None) #gets rid of small tree as a class, now we only have one real tree: big tree
-			small_tree.root = virtual_node
-			
+			#now big tree conatins small tree
+			small_tree.root = big_tree.root
 			x.updatePathMeasurements(0) #we dont need balancing steps info, so we put bs number
-
-			big_tree.delete_style_balancing(x, 0)
-
+			big_tree.delete_style_balancing(x, 0)   #balancing the tree
 			return big_tree
 
+		#if one of the tree is empty, we will use insert instead of join
+		if T1.empty():
+			T2.insert(0, x.getValue()) #insert first
+			return T2
+		elif T2.empty():
+			T1.insert(T1.length() ,x.getValue()) #insert last
+			return T1
 
-		T1height = T1.root.getHeight()
-		T2Height = T2.root.getHeight()
-
-		if T1height < T2Height:
-			return join(T1, T2, x, False)
-		elif T1height > T2Height:
-			return join(T2,T1, x, False)
 		else:
-			return join(T1, T2, x, True)
+			T1height = T1.root.getHeight()
+			T2Height = T2.root.getHeight()
+			
+			if T1height < T2Height:
+				return join(T1, T2, x, False, True)  #small_tree_first = true
+			elif T1height > T2Height:
+				return join(T2,T1, x, False, False)  #small_tree_first = false
+			else:
+				return join(T1, T2, x, True, True)  #save order 
 
 		
 
