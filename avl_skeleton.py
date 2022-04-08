@@ -25,7 +25,7 @@ class AVLNode(object):
 		self.parent = None
 		self.height = -1
 		self.size = 0
-		self.HightUpdate = False
+		self.HeightUpdate = False
 		
 
 	"""returns the left child
@@ -79,13 +79,13 @@ class AVLNode(object):
 
 
 	#new field that we added
-	"""returns if HightUpdate in the last updateMeserments
+	"""returns if HeightUpdate in the last updateMeserments
 
 	@rtype: bool
-	@returns: the HightUpdate-  true or false 
+	@returns: the HeightUpdate-  true or false 
 	"""
-	def getHightUpdate(self):
-		return self.HightUpdate
+	def getHeightUpdate(self):
+		return self.HeightUpdate
 
 
 	"""sets left child
@@ -136,14 +136,14 @@ class AVLNode(object):
 		# return None
 
 
-	"""sets the HightUpdate of the node
+	"""sets the HeightUpdate of the node
 
 	@type h: bool
-	@param h: the HightUpdate
+	@param h: the HeightUpdate
 	"""
 
-	def setHightUpdate(self, boolean):
-		self.HightUpdate = boolean
+	def setHeightUpdate(self, boolean):
+		self.HeightUpdate = boolean
 
 
 	"""sets the rank of the node
@@ -164,6 +164,50 @@ class AVLNode(object):
 		if (self.height == -1) and (self.value == None):
 			return False
 		return True
+
+	"""update size and height of path between newNode and root
+	@pre: node is real
+	@returns: None
+	"""
+	#We go all the way until we arrive the root
+	#time complexity: O(log(n))
+	def updatePathMeasurements(self, balancing_steps):	
+		while (self!=None):
+			#update height
+			oldHeight = self.getHeight()
+			leftheight= self.getRight().getHeight()
+			rightheight = self.getLeft().getHeight()
+			newheight = max(leftheight, rightheight)+1
+			if (oldHeight==newheight): #y height hasn't changed
+				self.setHeightUpdate(False)
+			else:	
+				self.setHeight(newheight)
+				self.setHeightUpdate(True)
+				balancing_steps += 1
+
+			#update size
+			rightsize = self.getRight().getSize()
+			leftsize  = self.getLeft().getSize()
+			newsize = rightsize + leftsize + 1
+			self.setSize(newsize)
+			#go to the parent until you arive the root
+			self = self.getParent()
+
+		return balancing_steps	
+
+	"""returns BF
+
+	@type node: AVLNode
+	@pre: node is not virtual
+	@param node: the node we want to calculate's BF
+	@rtype: int
+	@returns: the BF
+	"""
+	#gets BF 
+	#time complexity: O(1) bc its just math
+
+	def getBF(self):
+		return self.getLeft().getHeight() - self.getRight().getHeight()
 
 
 """
@@ -213,14 +257,18 @@ class AVLTreeList(object):
 	#  	return TreeSelectRec(x.left, i)
 	#  else:
 	# 		return TreeSelectRec(x.right, i-r) 
-	def TreeSelectRec(x, i):
-		r = x.getLeft().getSize() +1
-		if i==r:
-			return x
-		elif i<r:
-			return x.getLeft().TreeSelectRec( i)
-		else:
-			return x.getRight().TreeSelectRec( i-r) 
+	def TreeSelect(self, i):
+
+		def TreeSelectRec(x, i):
+			r = x.getLeft().getSize() + 1
+			if i==r:
+				return x
+			elif i<r:
+				return TreeSelectRec(x.getLeft(), i)
+			else:
+				return TreeSelectRec(x.getRight(), i-r) 
+
+		return TreeSelectRec(self.root, i)
 
 
 	"""retrieves the value of the i'th item in the list
@@ -239,23 +287,10 @@ class AVLTreeList(object):
 	def retrieve(self, i):
 		if (i<0 or i>= self.length()): 
 			return None
-		return self.getRoot().TreeSelectRec(i+1).getValue()
+		return self.TreeSelect(i+1).getValue()
 	
 
 
-	"""returns BF
-
-	@type node: AVLNode
-	@pre: node is not virtual
-	@param node: the node we want to calculate's BF
-	@rtype: int
-	@returns: the BF
-	"""
-	#gets BF 
-	#time complexity: O(1) bc its just math
-
-	def getBF(node):
-		return node.getLeft().getHight() - node.getRight().getHeight()
 
 
 	"""returns predecessor 
@@ -333,9 +368,9 @@ class AVLTreeList(object):
 	def insert(self, i, val):
 
 		newNode = AVLNode(val)
-		balancing_steps = 0 #counting how many fixes to hight and rotations
+		balancing_steps = 0 #counting how many fixes to height and rotations
 
-		if i==0 :           #upadate min and max
+		if i==0 :           #update min and max
 			self.min = newNode
 
 
@@ -346,20 +381,22 @@ class AVLTreeList(object):
 			virtualLeft = AVLNode(None)
 			newNode.setRight(virtualRight)
 			newNode.setLeft(virtualLeft)
+			balancing_steps = newNode.updatePathMeasurements(balancing_steps)
+			self.max = newNode #max is now also the root
 
 		#1
 		else:
 			if i==self.length() :
-				#insert last, max has two virtual nodes, we insert in between max and its virtual node
+				#insert last, last node has two virtual nodes, we insert in between last node and its virtual node
 				#the newNode, than make new leftVirtual to the newNode 
-				max = self.max
+				last_node = self.max
 				virtualLeft = AVLNode(None)
-				virtualRight = max.getRight()
+				virtualRight = last_node.getRight()
 				newNode.setRight(virtualRight)
 				newNode.setLeft(virtualLeft)
-				max.setRight(newNode)
+				last_node.setRight(newNode)
 			else:
-				currNode = TreeSelectRec(self.getRoot(), i+1)
+				currNode = self.TreeSelect(i+1)
 				if not currNode.getLeft().isRealNode():
 					#insert in index i, curr has left virtual nodes, we insert in between curr and its virtual node
 					#the newNode, than make new RightVirtual to the newNode  
@@ -381,12 +418,12 @@ class AVLTreeList(object):
 			if i==self.length(): #updates max only after inserting the node, to help with case when list is empty
 				self.max = newNode
 
-			balancing_steps = newNode.updatePathMeasurements( balancing_steps) #update size and hight and balancing_steps
+			balancing_steps = newNode.updatePathMeasurements( balancing_steps) #update size and height and balancing_steps
 			#2
 			y = newNode.getParent()
-			while (y.isRealNode()) and (y!=None):
+			while y != None:
 				if abs(y.getBF()) < 2 :
-					if not y.getHightUpdate():
+					if not y.getHeightUpdate():
 						break
 					else:
 						y = y.getParent()
@@ -513,35 +550,7 @@ class AVLTreeList(object):
 
 		
 
-	"""update size and hight of path between newNode and root
-	@pre: node is real
-	@returns: None
-	"""
-	#We go all the way until we arrive the root
-	#time complexity: O(log(n))
-	def updatePathMeasurements(node, balancing_steps):	
-		while (node!=None):
-			#update hight
-			oldHight = node.getHight()
-			lefthight= node.getRight().getHight()
-			righthight = node.getLeft().getHight()
-			newhight = max(lefthight, righthight)+1
-			if (oldHight==newhight): #y hight hasn't changed
-				node.setHightUpdate(False)
-			else:	
-				node.setHeight(newhight)
-				node.setHightUpdate(True)
-				balancing_steps += 1
 
-			#update size
-			rightsize = node.getRight().getSize()
-			leftsize  = node.getLeft().getSize()
-			newsize = rightsize + leftsize + 1
-			node.setSize(newsize)
-			#go to the parent until you arive the root
-			y = node.getParent()
-
-		return balancing_steps
 
 		
 
@@ -582,7 +591,7 @@ class AVLTreeList(object):
 			return -1
 
 		balancing_steps = 0 #how many balancing steps we made
-		node = self.getRoot().TreeSelectRec( i+1)
+		node = self.TreeSelect( i+1)
 
 
 		children = 0				#checks how many children, and if so, which one is it (left T or F)
@@ -617,7 +626,7 @@ class AVLTreeList(object):
 		elif children == 1:											#1.case_2
 			
 			if hasLeft: 
-				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for hight or size updates, just make it the root
+				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for height or size updates, just make it the root
 					new_root = node.getLeft()
 					new_root.setParent(None)
 					self.root = new_root
@@ -636,7 +645,7 @@ class AVLTreeList(object):
 					node.AVLdelete() 
 
 			else:
-				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for hight or size updates, just make it the root
+				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for height or size updates, just make it the root
 					new_root = node.getRight()
 					new_root.setParent(None)
 					self.root = new_root
@@ -690,7 +699,7 @@ class AVLTreeList(object):
 		########## done with 1 and 2 ####################
 		########## start 3 ##############################
 
-		balancing_steps = y.updatePathMeasurements(balancing_steps) #update size and hight and balancing_steps
+		balancing_steps = y.updatePathMeasurements(balancing_steps) #update size and height and balancing_steps
 			
 			
 		balancing_steps = self.delete_style_balancing(y, balancing_steps)
@@ -701,7 +710,7 @@ class AVLTreeList(object):
 	def delete_style_balancing(self, node, balancing_steps):
 		while (node.isRealNode()) and (node!=None):
 			if abs(node.getBF()) < 2 :
-				if not node.getHightUpdate():
+				if not node.getHeightUpdate():
 					break
 				else:
 					node = node.getParent()
@@ -835,7 +844,7 @@ class AVLTreeList(object):
 	#find node in place i, than go up to the root and join bigger subtrees to Large tree, and smaller subtrees to Small Tree
 	def split(self, i):
 
-		x = self.getRoot().TreeSelectRec(i)
+		x = self.TreeSelect(i)
 		val_x = x.getValue()
 
 		if i!= 0 :
@@ -919,7 +928,7 @@ class AVLTreeList(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 	def concat(self, lst):
-		hight_difference = abs(self.getRoot().getHeight() - lst.getRoot().getHeight())
+		height_difference = abs(self.getRoot().getHeight() - lst.getRoot().getHeight())
 
 		if not self.empty() :
 			val_x = self.max.getValue() # val of last node in self
@@ -932,7 +941,7 @@ class AVLTreeList(object):
 		else:
 			selfroot = lst.getRoot()  #we have only one list
 			
-		return hight_difference
+		return height_difference
 
 
 	"""joins two trees given a middle index x
