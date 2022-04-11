@@ -590,6 +590,8 @@ class AVLTreeList(object):
 
 		if B.getParent() == None: ##if none then B is root
 			B_is_root = True
+		else:
+			flag_B_left_child =  B.is_left_child()
 
 		A = B.getLeft()
 		B.setLeft(A.getRight())
@@ -601,7 +603,7 @@ class AVLTreeList(object):
 			
 
 		else:	
-			if B.is_left_child():
+			if flag_B_left_child:
 				A.getParent().setLeft( A)
 			else:
 				A.getParent().setRight( A)
@@ -620,9 +622,12 @@ class AVLTreeList(object):
 	
 	def LeftRotation(self, B):
 		B_is_root=False
-
+		
+			 
 		if B == self.getRoot():
 			B_is_root = True
+		else:
+			flag_B_left_child =  B.is_left_child()
 
 		A = B.getRight()
 		B.setRight(A.getLeft())
@@ -634,7 +639,7 @@ class AVLTreeList(object):
 
 		else:	
 			
-			if B.is_left_child():
+			if flag_B_left_child:
 				A.getParent().setLeft( A)
 			else:
 				A.getParent().setRight( A)
@@ -767,23 +772,23 @@ class AVLTreeList(object):
 			successor = node.getSuccessor()
 			y = successor.getParent()  									#because of successor being deleted node in terms of shape, we start fixing here
 			successor.getRight().setParent( successor.getParent())		#successor ALWAYS has right child and is left child
-			successor.getParent().setLeft(successor.getRight())
+			successor.getParent().setRight(successor.getRight())
 
 			#update min and max
 			if (i==0):
 				self.min = successor
-			elif (i == self.length-1):
+			elif (i == self.length()-1):
 				self.max = node.getPredecessor()
 
 			successor.setParent(node.getParent())     					  #steal node's parent
 
-			if node == self.getRoot()():
+			if node == self.getRoot():
 				self.root = successor
 
 			elif node.is_left_child():
 				successor.getParent().setLeft( successor)
 			else:
-				successor.getParent().etRight( successor)
+				successor.getParent().getRight( )
 
 			successor.setRight( node.getRight())							#steal node's right child
 			successor.getRight().setParent( successor)
@@ -1175,9 +1180,9 @@ list_2 = AVLTreeList()
 insert_values2 = ["and","fell","in","love","with","amir,","the","cat"]
 for i in range(len(insert_values2)):
 	list_2.insert(i, insert_values2[i])
-	print(list_2.getRoot().getHeight())
-	print(list_2.getRoot().getLeft().getHeight())
-	print(list_2.getRoot().getRight().getHeight())
+# 	print(list_2.getRoot().getHeight())
+# 	print(list_2.getRoot().getLeft().getHeight())
+# 	print(list_2.getRoot().getRight().getHeight())
 
 
 print(f"The length is {list_1.length()}")

@@ -44,18 +44,19 @@ added Delete_style_balancing
 added join
 
 
-Left to do in next meetings: 
-split , concat 
-checking everything to see it works
-לעבור על הדף שגיאות של סמסטר קודם ולתקן בקוד שלנו
- 
-next meeting- 
-split , concat 
-checking everything to see it works
-לעבור על הדף שגיאות של סמסטר קודם ולתקן בקוד שלנו
 
 07/04
+split , concat 
 finished all code
 next meeting: DEBUG LIKE OUR LIFE DEPENDS ON IT
+
+
+
+ 
+next meeting- 
+לעבור על האלגוריתם של דליט בבסיס שלו ולהבין את הקטע עם סקססור, איך מתנהלים איתו
+
+
+checking everything to see it works
 
 
