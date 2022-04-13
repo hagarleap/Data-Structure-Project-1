@@ -98,7 +98,6 @@ class AVLNode(object):
 	"""
 	def setLeft(self, node):
 		self.left = node
-		node.setParent(self)
 	#	return None
 
 	"""sets right child
@@ -108,7 +107,6 @@ class AVLNode(object):
 	"""
 	def setRight(self, node):
 		self.right = node
-		node.setParent(self)
 		# return None
 
 	"""sets parent
@@ -469,7 +467,9 @@ class AVLTreeList(object):
 			virtualRight = AVLNode(None)
 			virtualLeft = AVLNode(None)
 			newNode.setRight(virtualRight)
+			virtualRight.setParent(newNode)
 			newNode.setLeft(virtualLeft)
+			virtualLeft.setParent(newNode)
 			balancing_steps = newNode.updateMeasurements(balancing_steps)
 			self.max = newNode #max is now also the root
 
@@ -1068,7 +1068,7 @@ class AVLTreeList(object):
 						join_node = join_node.getLeft()
 
 
-			
+############################find new order this doesnt work######################################			
 			if (small_tree_first):  #pointers for x for all cases (also in Isequael == TRUE)
 				x.setLeft(small_tree.getRoot())
 				x.setRight(join_node)
