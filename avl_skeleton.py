@@ -1011,7 +1011,7 @@ class AVLTreeList(object):
 		if not self.empty() :
 			val_x = self.max.getValue() # val of last node in self
 			x = AVLNode(val_x) #craate new node x
-			last_index = self.length()
+			last_index = self.length()-1
 			self.delete(last_index)
 			
 			self.AVL_join(lst ,x)
@@ -1278,56 +1278,60 @@ insert_values2 = ["and","fell","in","love","with","amir,","the","cat"]
 for i in range(len(insert_values2)):
 	list_2.insert(i, insert_values2[i])
 
+
 print(list_2)
 
-print(list_2.first())
-print(list_2.last())
-
-print(f"The length is {list_2.length()}")
-list_2.delete(5)
-print(f"The length is {list_2.length()}") 
-print(list_2)
-print(f"{list_1.retrieve(1)} {list_1.retrieve(2)} {list_2.retrieve(4)} {list_2.retrieve(5)} {list_2.retrieve(6)}")
-
-print(list_1.listToArray())
-print(list_1.first())
-print(list_1.last())
-print(list_2.first())
-print(list_2.last())
-
-list_1.delete(3)
-print(list_1)
-list_1.delete(0)
-print(list_1)
-list_1.delete(5)
+list_1.concat(list_2)
 print(list_1)
 
+# print(list_2.first())
+# print(list_2.last())
+
+# print(f"The length is {list_2.length()}")
+# list_2.delete(5)
+# print(f"The length is {list_2.length()}") 
+# print(list_2)
+# print(f"{list_1.retrieve(1)} {list_1.retrieve(2)} {list_2.retrieve(4)} {list_2.retrieve(5)} {list_2.retrieve(6)}")
+
+# print(list_1.listToArray())
+# print(list_1.first())
+# print(list_1.last())
+# print(list_2.first())
+# print(list_2.last())
+
+# list_1.delete(3)
+# print(list_1)
+# list_1.delete(0)
+# print(list_1)
+# list_1.delete(5)
+# print(list_1)
 
 
 
-listy_list = list_1.split(1)
-print(listy_list[0])
-print(listy_list[2])
-listy_list[0].concat(list_2)
 
-print(list_1.listToArray)
-print(list_1.first())
-print(list_1.last())
+# listy_list = list_1.split(1)
+# print(listy_list[0])
+# print(listy_list[2])
+# listy_list[0].concat(list_2)
 
-list_empty = AVLTreeList()
-list_empty.first()
-list_empty.last()
-list_empty.listToArray()
-list_empty.retrieve(3)
-list_empty.length()
-list_empty.search("hagar")
+# print(list_1.listToArray)
+# print(list_1.first())
+# print(list_1.last())
 
-list_empty2 = AVLTreeList()
-list_empty.concat()
+# list_empty = AVLTreeList()
+# list_empty.first()
+# list_empty.last()
+# list_empty.listToArray()
+# list_empty.retrieve(3)
+# list_empty.length()
+# list_empty.search("hagar")
 
-list_empty3 = AVLTreeList()
-list_empty3.split(0)
-list_empty3.split(1)
+# list_empty2 = AVLTreeList()
+
+
+# list_empty3 = AVLTreeList()
+# list_empty3.split(0)
+# list_empty3.split(1)
 
 
 
