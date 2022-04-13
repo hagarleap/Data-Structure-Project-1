@@ -26,6 +26,9 @@ class AVLNode(object):
 		self.height = -1
 		self.size = 0
 		self.HeightUpdate = False
+
+	def __repr__(self):
+		return "(" + str(self.val) + ")"
 		
 
 	"""returns the left child
@@ -350,6 +353,13 @@ class AVLTreeList(object):
 		self.min = self.getRoot()
 		self.max = self.getRoot()
 		# add your fields here
+
+
+	def __repr__(self):
+		out = ""
+		for row in printree(self):  # need printree.py file
+			out = out + row + "\n"
+		return out
 
 
 	"""returns whether the list is empty
@@ -770,14 +780,18 @@ class AVLTreeList(object):
 		else:															#1.case_3
 																					
 			successor = node.getSuccessor()
+
 		
 			if successor.getParent() != node:
 				y = successor.getParent()  									#because of successor being deleted node in terms of shape, we start fixing here
 			else:
 				y = successor
 
-			successor.getRight().setParent( successor.getParent())		#successor ALWAYS has right child and is left child
-			successor.getParent().setRight(successor.getRight())
+			successor.getRight().setParent( successor.getParent())		#successor may have a right child and will NEVER have left child (else not successor)
+			if successor.is_left_child():
+				successor.getParent().setLeft(successor.getRight())
+			else:
+				successor.getParent().setRight(successor.getRight())
 
 			#update min and max
 			if (i==0):
@@ -791,16 +805,15 @@ class AVLTreeList(object):
 				self.root = successor
 
 			elif node.is_left_child():
-				successor.getParent().setLeft( successor)
+				successor.getParent().setLeft( successor)	#set nodes left child to be successor
 			else:
-				successor.getParent().getRight( )
+				successor.getParent().setRight(successor )  #set nodes right child to be successor
 
 			successor.setRight( node.getRight())							#steal node's right child
 			successor.getRight().setParent( successor)
-
-			if node.size != 3:
-				successor.setLeft( node.getLeft())							#steal node's left child
-				successor.getLeft().setParent(successor)
+			
+			successor.setLeft(node.getLeft())							#steal node's left child
+			successor.getLeft().setParent(successor)
 			
 			
 			node.AVLdelete()
@@ -909,7 +922,7 @@ class AVLTreeList(object):
 	#find node in place i, than go up to the root and join bigger subtrees to Large tree, and smaller subtrees to Small Tree
 	def split(self, i):
 
-		x = self.TreeSelect(i)
+		x = self.TreeSelect(i+1)
 		val_x = x.getValue()
 
 		if i!= 0 :
@@ -918,12 +931,12 @@ class AVLTreeList(object):
 			large_tree_min = x.getSuccessor()
 
 		small_tree = AVLTreeList()  #initaize small tree with x left child subtree
-		small_tree.root = x.geLeft()
-		small_tree.getRoot().setParent(None)
+		small_tree.root = x.getLeft()
+		small_tree.root.setParent(None)
 
 		large_tree = AVLTreeList() #initaize large tree with x right child subtree
 		large_tree.root = x.getRight()
-		large_tree.getRoot().setParent(None)
+		large_tree.root.setParent(None)
 		
 		
 		y = x.getParent()
@@ -1171,26 +1184,150 @@ class AVLTreeList(object):
 
 
 
+
+
+
+
+
+###################################################### printree ######################################################
+###################################################### function ######################################################
+
+def printree(t, bykey=False):
+    """Print a textual representation of t
+    bykey=True: show keys instead of values"""
+    return trepr(t, t.getRoot(), bykey)
+
+
+def trepr(t, node, bykey=False):
+    """Return a list of textual representations of the levels in t
+    bykey=True: show keys instead of values"""
+    if not node.isRealNode():  # You might want to change this, depending on your implementation
+        return ["#"]    # Hashtag marks a virtual node
+
+    thistr = str(node.getValue())
+
+    return conc(trepr(t, node.getLeft(), bykey), thistr, trepr(t, node.getRight(), bykey))
+
+
+def conc(left, root, right):
+    """Return a concatenation of textual representations of
+    a root node, its left node, and its right node
+    root is a string, and left and right are lists of strings"""
+
+    lwid = len(left[-1])
+    rwid = len(right[-1])
+    rootwid = len(root)
+
+    result = [(lwid + 1) * " " + root + (rwid + 1) * " "]
+
+    ls = leftspace(left[0])
+    rs = rightspace(right[0])
+    result.append(ls * " " + (lwid - ls) * "_" + "/" + rootwid * " " + "\\" + rs * "_" + (rwid - rs) * " ")
+
+    for i in range(max(len(left), len(right))):
+        row = ""
+        if i < len(left):
+            row += left[i]
+        else:
+            row += lwid * " "
+
+        row += (rootwid + 2) * " "
+
+        if i < len(right):
+            row += right[i]
+        else:
+            row += rwid * " "
+
+        result.append(row)
+
+    return result
+
+
+def leftspace(row):
+    """helper for conc"""
+    # row is the first row of a left node
+    # returns the index of where the second whitespace starts
+    i = len(row) - 1
+    while row[i] == " ":
+        i -= 1
+    return i + 1
+
+
+def rightspace(row):
+    """helper for conc"""
+    # row is the first row of a right node
+    # returns the index of where the first whitespace ends
+    i = 0
+    while row[i] == " ":
+        i += 1
+    return i
+
+
 list_1 = AVLTreeList()
 print(f"Is the list empty? {list_1.empty()}") 
 insert_values1 = ["the","big","fat","orange","cat","slept","all","day"]
 for i in range(len(insert_values1)):
     list_1.insert(i, insert_values1[i])
 
-
 print(f"Is the list empty? {list_1.empty()}") 
 print(f"The length is {list_1.length()}")
+print(list_1)
 
 list_2 = AVLTreeList()
 insert_values2 = ["and","fell","in","love","with","amir,","the","cat"]
 for i in range(len(insert_values2)):
 	list_2.insert(i, insert_values2[i])
-# 	print(list_2.getRoot().getHeight())
-# 	print(list_2.getRoot().getLeft().getHeight())
-# 	print(list_2.getRoot().getRight().getHeight())
 
+print(list_2)
 
-print(f"The length is {list_1.length()}")
+print(list_2.first())
+print(list_2.last())
+
+print(f"The length is {list_2.length()}")
 list_2.delete(5)
-print(f"The length is {list_1.length()}") ##problem
+print(f"The length is {list_2.length()}") 
+print(list_2)
 print(f"{list_1.retrieve(1)} {list_1.retrieve(2)} {list_2.retrieve(4)} {list_2.retrieve(5)} {list_2.retrieve(6)}")
+
+print(list_1.listToArray())
+print(list_1.first())
+print(list_1.last())
+print(list_2.first())
+print(list_2.last())
+
+list_1.delete(3)
+print(list_1)
+list_1.delete(0)
+print(list_1)
+list_1.delete(5)
+print(list_1)
+
+
+
+
+listy_list = list_1.split(1)
+print(listy_list[0])
+print(listy_list[2])
+listy_list[0].concat(list_2)
+
+print(list_1.listToArray)
+print(list_1.first())
+print(list_1.last())
+
+list_empty = AVLTreeList()
+list_empty.first()
+list_empty.last()
+list_empty.listToArray()
+list_empty.retrieve(3)
+list_empty.length()
+list_empty.search("hagar")
+
+list_empty2 = AVLTreeList()
+list_empty.concat()
+
+list_empty3 = AVLTreeList()
+list_empty3.split(0)
+list_empty3.split(1)
+
+
+
