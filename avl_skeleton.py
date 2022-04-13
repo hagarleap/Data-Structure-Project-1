@@ -697,7 +697,7 @@ class AVLTreeList(object):
 		balancing_steps = 0 #how many balancing steps we made
 		node = self.TreeSelect( i+1)
 
-
+		y = None					#initiallizing y, the parent of the physically deleted node
 		children = 0				#checks how many children, and if so, which one is it (left T or F)
 		hasLeft = False
 		if node.getLeft().isRealNode():
@@ -770,7 +770,12 @@ class AVLTreeList(object):
 		else:															#1.case_3
 																					
 			successor = node.getSuccessor()
-			y = successor.getParent()  									#because of successor being deleted node in terms of shape, we start fixing here
+		
+			if successor.getParent() != node:
+				y = successor.getParent()  									#because of successor being deleted node in terms of shape, we start fixing here
+			else:
+				y = successor
+
 			successor.getRight().setParent( successor.getParent())		#successor ALWAYS has right child and is left child
 			successor.getParent().setRight(successor.getRight())
 
