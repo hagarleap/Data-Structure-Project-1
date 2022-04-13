@@ -51,12 +51,7 @@ finished all code
 next meeting: DEBUG LIKE OUR LIFE DEPENDS ON IT
 
 
-
  
 next meeting- 
-לעבור על האלגוריתם של דליט בבסיס שלו ולהבין את הקטע עם סקססור, איך מתנהלים איתו
 
-
-checking everything to see it works
-
-
+לבדוק את ספליט, קונקאט, וכל הפונקציות על רשימה ריקה
