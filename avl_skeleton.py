@@ -166,12 +166,11 @@ class AVLNode(object):
 			return False
 		return True
 
-	"""update size and height of path between newNode and root
+	"""update size and height and HeightUpdate of Node 
 	@pre: node is real
 	@returns: None
 	"""
-	#We go all the way until we arrive the root
-	#time complexity: O(log(n))
+	#time complexity: O(1)
 	def updateMeasurements(self, balancing_steps):	
 		oldHeight = self.getHeight()
 		leftheight= self.getLeft().getHeight()
