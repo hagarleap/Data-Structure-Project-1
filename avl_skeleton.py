@@ -508,7 +508,7 @@ class AVLTreeList(object):
 				else:
 					#insert in index i, pre has two virtual nodes, we insert in between pre and its virtual node
 					#the newNode, than make new leftVirtual to the newNode 
-					preNode = currNode.getPredecessor(currNode)
+					preNode = currNode.getPredecessor()
 					virtualLeft = AVLNode(None)
 					virtualRight = preNode.getRight()
 					newNode.setRight(virtualRight)
@@ -517,7 +517,7 @@ class AVLTreeList(object):
 
 					virtualLeft.setParent(newNode)
 					virtualRight.setParent(newNode)
-					newNode.getParent(preNode)
+					newNode.setParent(preNode)
 					
 			if i==self.length(): #updates max only after inserting the node, to help with case when list is empty
 				self.max = newNode
@@ -895,7 +895,7 @@ class AVLTreeList(object):
 
 		#check that global/local variables are not an issue
 
-		listtoArray_rec(self.getRoot())
+		listtoArray_rec(self.root)
 		return result
 
 	"""returns the size of the list 
@@ -907,7 +907,7 @@ class AVLTreeList(object):
 	#time complexity: O(1)
 
 	def length(self):
-		return self.getRoot().getSize()
+		return self.root.getSize()
 
 	"""splits the list at the i'th index
 
@@ -921,30 +921,40 @@ class AVLTreeList(object):
 
 	#find node in place i, than go up to the root and join bigger subtrees to Large tree, and smaller subtrees to Small Tree
 	def split(self, i):
-
+		
 		x = self.TreeSelect(i+1)
 		val_x = x.getValue()
 
-		if i!= 0 :
-			small_tree_max = x.getPredecessor()
-		if i!= self.length()-1:
-			large_tree_min = x.getSuccessor()
+		if i == 0:
+			tree = AVLTreeList()
+			self.delete(i)
+			return [tree, val_x, self]
+		if i == self.length()-1:
+			tree = AVLTreeList()
+			self.delete(i)
+			return [self, val_x, tree]
+			
+		small_tree_max = x.getPredecessor()
+		large_tree_min = x.getSuccessor()
 
 		small_tree = AVLTreeList()  #initaize small tree with x left child subtree
 		small_tree.root = x.getLeft()
 		small_tree.root.setParent(None)
+		small_tree.min = small_tree.root
+		small_tree.max = small_tree.root
 
 		large_tree = AVLTreeList() #initaize large tree with x right child subtree
 		large_tree.root = x.getRight()
 		large_tree.root.setParent(None)
+		large_tree.min = large_tree.root
+		large_tree.max = large_tree.root
 		
 		
 		y = x.getParent()
 
-		if x.is_left_child :
+		come_from_left = False
+		if x.is_left_child() :
 			come_from_left = True
-		else:
-			come_from_left = False
 
 		x.AVLdelete()
 
@@ -962,31 +972,35 @@ class AVLTreeList(object):
 			if come_from_left:
 
 				if y != self.getRoot():
-					if y.is_left_child :
+					if y.is_left_child() :
 						come_from_left = True
 					else:
 						come_from_left = False
 
 				temp_bigger_tree =  AVLTreeList()
 				temp_bigger_tree.root = y.getRight()
-				temp_bigger_tree.getRoot().setParent(None)
+				temp_bigger_tree.root.setParent(None)
+				temp_bigger_tree.min = temp_bigger_tree.root
+				temp_bigger_tree.max = temp_bigger_tree.root
 				
 			
-				large_tree = large_tree.AVL_join( y , temp_bigger_tree)
+				large_tree = large_tree.AVL_join(temp_bigger_tree, y)
 
 			else:  
 
-				if y != self.getRoot():
-					if y.is_left_child :
+				if y != self.root:
+					if y.is_left_child() :
 						come_from_left = True
 					else:
 						come_from_left = False
 				
 				temp_smaller_tree =  AVLTreeList()
-				temp_smaller_tree = y.getLeft()
-				temp_smaller_tree.getRoot().setParent(None)
+				temp_smaller_tree.root = y.getLeft()
+				temp_smaller_tree.root.setParent(None)
+				temp_smaller_tree.min = temp_smaller_tree.root
+				temp_smaller_tree.max = temp_smaller_tree.root
 
-				small_tree = temp_smaller_tree.AVL_join( y , small_tree )
+				small_tree = temp_smaller_tree.AVL_join(small_tree, y )
 
 			y = z  #go up to the parent
 			
@@ -1006,7 +1020,7 @@ class AVLTreeList(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 	def concat(self, lst):
-		height_difference = abs(self.getRoot().getHeight() - lst.getRoot().getHeight())
+		height_difference = abs(self.root.getHeight() - lst.root.getHeight())
 
 		if not self.empty() :
 			val_x = self.max.getValue() # val of last node in self
@@ -1017,7 +1031,7 @@ class AVLTreeList(object):
 			self.AVL_join(lst ,x)
 
 		else:
-			selfroot = lst.getRoot()  #we have only one list
+			self.root = lst.root  #we have only one list
 			
 		return height_difference
 
@@ -1033,14 +1047,14 @@ class AVLTreeList(object):
 	def AVL_join(T1, T2, x):
 
 		def join(small_tree, big_tree, x, is_equal , small_tree_first): #joins given that small_tree <= big_tree
-			join_node = big_tree.getRoot()
+			join_node = big_tree.root
 
 			if (small_tree_first):  
-				while join_node.getHeight() > small_tree.getRoot().getHeight(): #find the area of the join node
+				while join_node.getHeight() > small_tree.root.getHeight(): #find the area of the join node
 					join_node = join_node.getLeft()
 
 			else:
-				while join_node.getHeight() > small_tree.getRoot().getHeight(): #find the area of the join node
+				while join_node.getHeight() > small_tree.root.getHeight(): #find the area of the join node
 					join_node = join_node.getRight()	
 				  
 
@@ -1067,36 +1081,35 @@ class AVLTreeList(object):
 					else:
 						join_node = join_node.getLeft()
 
-
-############################find new order this doesnt work######################################			
+			
 			if (small_tree_first):  #pointers for x for all cases (also in Isequael == TRUE)
-				x.setLeft(small_tree.getRoot())
+				x.setLeft(small_tree.root)
 				x.setRight(join_node)
 			else:
-				x.setRight(small_tree.getRoot())
+				x.setRight(small_tree.root)
 				x.setLeft(join_node)
 
 
 			if not is_equal:               
 				x.setParent(join_node.getParent())
 				if (small_tree_first): 
-					x.getParent.setLeft(x)
-					if x.getParent.getRight() ==join_node: #in case right child of parent points to joinnode, got to get rid of pointer
+					x.getParent().setLeft(x)
+					if x.getParent().getRight() ==join_node: #in case right child of parent points to joinnode, got to get rid of pointer
 						virtual_node = AVLNode(None)
-						x.getParent.setRight(virtual_node)
+						x.getParent().setRight(virtual_node)
 				else:
-					x.getParent.setRight(x)
-					if x.getParent.getLeft() ==join_node: #in case left child of parent points to joinnode, got to get rid of pointer
+					x.getParent().setRight(x)
+					if x.getParent().getLeft() ==join_node: #in case left child of parent points to joinnode, got to get rid of pointer
 						virtual_node = AVLNode(None)
-						x.getParent.setLeft(virtual_node)
+						x.getParent().setLeft(virtual_node)
 			else:
 				big_tree.root = x
 			
-			small_tree.getRoot().setParent(x)
+			small_tree.root.setParent(x)
 			join_node.setParent(x)
 
 			#now big tree conatins small tree
-			small_tree.root = big_tree.getRoot()
+			small_tree.root = big_tree.root
 			big_tree.delete_style_balancing(x, 0)   #balancing the tree, we dont need balancing steps info, so we put bs number
 			return big_tree
 
@@ -1105,7 +1118,7 @@ class AVLTreeList(object):
 			T2.insert(0, x.getValue()) #insert first
 			return T2
 		elif T2.empty():
-			T1.insert(T1.length() ,x.getValue()) #insert last
+			T1.insert(T1.length() , x.getValue()) #insert last
 			return T1
 
 		else:
@@ -1147,10 +1160,10 @@ class AVLTreeList(object):
 	def search(self, val):
 		culprit = None
 		found = False
-		def search_rec(node, val):
+		def search_rec(node, val, found):
 			if found:
 				return
-			if node.isRealNode(val):
+			if node.isRealNode():
 				search_rec(node.getLeft())
 				if found:
 					return
@@ -1160,7 +1173,7 @@ class AVLTreeList(object):
 					return
 				else:
 					search_rec(node.getRight())
-		search_rec(self.getRoot(), val)
+		search_rec(self.root, val, found)
 		if not found:
 			return -1
 		else:
@@ -1195,7 +1208,7 @@ class AVLTreeList(object):
 def printree(t, bykey=False):
     """Print a textual representation of t
     bykey=True: show keys instead of values"""
-    return trepr(t, t.getRoot(), bykey)
+    return trepr(t, t.root, bykey)
 
 
 def trepr(t, node, bykey=False):
@@ -1263,26 +1276,24 @@ def rightspace(row):
     return i
 
 
-list_1 = AVLTreeList()
-print(f"Is the list empty? {list_1.empty()}") 
-insert_values1 = ["the","big","fat","orange","cat","slept","all","day"]
-for i in range(len(insert_values1)):
-    list_1.insert(i, insert_values1[i])
+# list_1 = AVLTreeList()
+# print(f"Is the list empty? {list_1.empty()}") 
+# insert_values1 = ["the","big","fat","orange","cat","slept","all","day"]
+# for i in range(len(insert_values1)):
+#     list_1.insert(i, insert_values1[i])
 
-print(f"Is the list empty? {list_1.empty()}") 
-print(f"The length is {list_1.length()}")
-print(list_1)
+# print(f"Is the list empty? {list_1.empty()}") 
+# print(f"The length is {list_1.length()}")
+# print(list_1)
 
-list_2 = AVLTreeList()
-insert_values2 = ["and","fell","in","love","with","amir,","the","cat"]
-for i in range(len(insert_values2)):
-	list_2.insert(i, insert_values2[i])
+# list_2 = AVLTreeList()
+# insert_values2 = ["and","fell","in","love","with","amir,","the","cat"]
+# for i in range(len(insert_values2)):
+# 	list_2.insert(i, insert_values2[i])
 
 
-print(list_2)
+# print(list_2)
 
-list_1.concat(list_2)
-print(list_1)
 
 # print(list_2.first())
 # print(list_2.last())
@@ -1319,19 +1330,49 @@ print(list_1)
 # print(list_1.last())
 
 # list_empty = AVLTreeList()
-# list_empty.first()
-# list_empty.last()
-# list_empty.listToArray()
-# list_empty.retrieve(3)
-# list_empty.length()
-# list_empty.search("hagar")
+# print(list_empty.first())
+# print(list_empty.last())
+# print(list_empty.listToArray())
+# print(list_empty.retrieve(3))
+# print(list_empty.length())
+# print(list_empty.search("hagar"))
 
 # list_empty2 = AVLTreeList()
 
 
 # list_empty3 = AVLTreeList()
-# list_empty3.split(0)
-# list_empty3.split(1)
+# print(list_empty2)
+# list_empty2.concat(list_empty3)
+# print(list_empty2)
 
+list_1 = AVLTreeList()
+insert_values1 = ["the","big","fat","orange","cat","slept","all","day"]
+for i in range(len(insert_values1)):
+    list_1.insert(i, insert_values1[i])
 
+# list_1.insert(0,"__")
+# list_1.insert(2,"__")
+# list_1.insert(4,"__")
+# list_1.insert(6,"__")
+# list_1.insert(8,"__")
+# list_1.insert(10,"__")
+# list_1.insert(12,"__")
+# list_1.insert(14,"__")
+# list_1.insert(16,"__")
 
+print(list_1)
+# print(list_1.listToArray())
+
+#    [ _,"the",,"big",,"fat",,"orange",,"cat",,"slept",,"all",,"day",_]
+lol = list_1.split(list_1.length()-2)
+print(lol[0])
+print(lol[1])
+print(lol[2])
+print(lol[0].listToArray())
+print(lol[2].listToArray())
+lol = list_1.split(2)
+print(lol[0])
+print(lol[1])
+print(lol[2])
+print(lol[0].listToArray())
+print(lol[2].listToArray())
