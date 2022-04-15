@@ -340,11 +340,6 @@ A class implementing the ADT list, using an AVL tree.
 
 class AVLTreeList(object):
 
-	"""
-	Constructor, you are allowed to add more fields.  
-
-	"""
-
 	def __init__(self):
 		self.root = AVLNode(None)
 		self.min = self.getRoot()
@@ -1344,10 +1339,10 @@ def rightspace(row):
 # list_empty2.concat(list_empty3)
 # print(list_empty2)
 
-list_1 = AVLTreeList()
-insert_values1 = ["the","big","fat","orange","cat","slept","all","day"]
-for i in range(len(insert_values1)):
-    list_1.insert(i, insert_values1[i])
+# list_1 = AVLTreeList()
+# insert_values1 = ["the","big","fat","orange","cat","slept","all","day"]
+# for i in range(len(insert_values1)):
+#     list_1.insert(i, insert_values1[i])
 
 # list_1.insert(0,"__")
 # list_1.insert(2,"__")
@@ -1359,19 +1354,19 @@ for i in range(len(insert_values1)):
 # list_1.insert(14,"__")
 # list_1.insert(16,"__")
 
-print(list_1)
-# print(list_1.listToArray())
+# print(list_1)
+# # print(list_1.listToArray())
 
-#    [ _,"the",,"big",,"fat",,"orange",,"cat",,"slept",,"all",,"day",_]
-lol = list_1.split(list_1.length()-2)
-print(lol[0])
-print(lol[1])
-print(lol[2])
-print(lol[0].listToArray())
-print(lol[2].listToArray())
-lol = list_1.split(2)
-print(lol[0])
-print(lol[1])
-print(lol[2])
-print(lol[0].listToArray())
-print(lol[2].listToArray())
+# #    [ _,"the",,"big",,"fat",,"orange",,"cat",,"slept",,"all",,"day",_]
+# lol = list_1.split(list_1.length()-2)
+# print(lol[0])
+# print(lol[1])
+# print(lol[2])
+# print(lol[0].listToArray())
+# print(lol[2].listToArray())
+# lol = list_1.split(2)
+# print(lol[0])
+# print(lol[1])
+# print(lol[2])
+# print(lol[0].listToArray())
+# print(lol[2].listToArray())
