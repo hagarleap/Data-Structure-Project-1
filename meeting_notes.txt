@@ -56,3 +56,7 @@ next meeting-
 לראות מה אנו בפורום לגבי הספירת איזון של קרימינל בהקשר הגובה
 לשכתב את הקובץ תיעוד מחדש - לפי החלוקה שעשינו
 להתחיל לעשות ניסויים
+
+16.4
+to do list:
+-check all code remove weird comments, make sure descriptions are appropriate

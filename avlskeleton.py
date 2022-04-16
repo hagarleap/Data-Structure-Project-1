@@ -172,7 +172,7 @@ class AVLNode(object):
 	@returns: None
 	"""
 	#time complexity: O(1)
-	def updateMeasurements(self, balancing_steps):	
+	def updateMeasurements(self):	
 		oldHeight = self.getHeight()
 		leftheight= self.getLeft().getHeight()
 		rightheight = self.getRight().getHeight()
@@ -182,15 +182,12 @@ class AVLNode(object):
 		else:	
 			self.setHeight(newheight)
 			self.setHeightUpdate(True)
-			balancing_steps += 1
 
 		#update size
 		rightsize = self.getRight().getSize()
 		leftsize  = self.getLeft().getSize()
 		newsize = rightsize + leftsize + 1
-		self.setSize(newsize)
-
-		return balancing_steps	
+		self.setSize(newsize)	
 
 
 	def fix_size_rec(self):
@@ -216,7 +213,10 @@ class AVLNode(object):
 	#time complexity: O(1) bc its just math
 
 	def getBF(self):
-		return self.getLeft().getHeight() - self.getRight().getHeight()
+		if self.isRealNode():
+			return self.getLeft().getHeight() - self.getRight().getHeight()
+		else:
+			return 0
 
 
 	
@@ -474,7 +474,7 @@ class AVLTreeList(object):
 			virtualRight.setParent(newNode)
 			newNode.setLeft(virtualLeft)
 			virtualLeft.setParent(newNode)
-			newNode.updateMeasurements(0)
+			newNode.updateMeasurements()
 			self.max = newNode #max is now also the root
 
 		#1
@@ -526,17 +526,18 @@ class AVLTreeList(object):
 			if i==self.length(): #updates max only after inserting the node, to help with case when list is empty
 				self.max = newNode
 
-			newNode.updateMeasurements(0) #update size and height and balancing_steps without adding to BS since its a new node not updated node
+			newNode.updateMeasurements() #update size and height and balancing_steps without adding to BS since its a new node not updated node
 			#2
 
 			y = newNode.getParent()
 			while y != None:
-				balancing_steps = y.updateMeasurements( balancing_steps)
+				y.updateMeasurements()
 				if abs(y.getBF()) < 2 :
 					if not y.getHeightUpdate():
 						break
 					else:
 						y = y.getParent()
+						balancing_steps += 1
 				else: #getBF(y)=2
 					balancing_steps = self.ImplementRotation( y, balancing_steps)
 					break
@@ -568,7 +569,6 @@ class AVLTreeList(object):
 		#time complexity O(1)
 
 	def ImplementRotation(self, node, balancing_steps):
-
 		if node.getBF() == -2:
 
 			if  node.getRight().getBF() ==-1 or node.getRight().getBF() ==0:    #child BF == -1 or 0
@@ -582,6 +582,7 @@ class AVLTreeList(object):
 		else:
 
 			if node.getLeft().getBF() == 1 or node.getLeft().getBF() == 0: 		#child BF == +1 or 0
+				#print(node.getLeft().getHeight())
 				self.RightRotation(node)
 				balancing_steps+=1
 
@@ -822,6 +823,7 @@ class AVLTreeList(object):
 			successor.setLeft(node.getLeft())							#steal node's left child
 			successor.getLeft().setParent(successor)
 			
+			successor.updateMeasurements()
 			
 			node.AVLdelete()
 		
@@ -839,16 +841,18 @@ class AVLTreeList(object):
 
 	def delete_style_balancing(self, node, balancing_steps):
 		while node!=None:
-			balancing_steps = node.updateMeasurements(balancing_steps)
+			node.updateMeasurements()
 			if abs(node.getBF()) < 2 :
 				if not node.getHeightUpdate():
 					break
 				else:
 					node = node.getParent()
+					balancing_steps += 1
 			else: #getBF(y)=2
 				node_temp = node.getParent()
 				balancing_steps = self.ImplementRotation(node, balancing_steps)
 				node = node_temp
+				
 	
 		return balancing_steps
 
@@ -1308,103 +1312,57 @@ def rightspace(row):
     return i
 
 
-# list_1 = AVLTreeList()
-# print(f"Is the list empty? {list_1.empty()}") 
-# insert_values1 = ["the","big","fat","orange","cat","slept","all","day"]
-# for i in range(len(insert_values1)):
-#     list_1.insert(i, insert_values1[i])
 
-# print(f"Is the list empty? {list_1.empty()}") 
-# print(f"The length is {list_1.length()}")
-# print(list_1)
+###################################################
+import random
+def Q_1(i):
+	
+	print(f"Experiment {1}")
 
-# list_2 = AVLTreeList()
-# insert_values2 = ["and","fell","in","love","with","amir,","the","cat"]
-# for i in range(len(insert_values2)):
-# 	list_2.insert(i, insert_values2[i])
+	tree_size = 1000*(2**i)
 
+	### experiment 1
+	print("Experiment 1:")
+	AVL1 = AVLTreeList()
+	total_steps=0
+	for x in range(tree_size):
+		index = random.randint(0, x) 
+		total_steps += AVL1.insert(index, x) 
 
-# print(list_2)
-
-
-# print(list_2.first())
-# print(list_2.last())
-
-# print(f"The length is {list_2.length()}")
-# list_2.delete(5)
-# print(f"The length is {list_2.length()}") 
-# print(list_2)
-# print(f"{list_1.retrieve(1)} {list_1.retrieve(2)} {list_2.retrieve(4)} {list_2.retrieve(5)} {list_2.retrieve(6)}")
-
-# print(list_1.listToArray())
-# print(list_1.first())
-# print(list_1.last())
-# print(list_2.first())
-# print(list_2.last())
-
-# list_1.delete(3)
-# print(list_1)
-# list_1.delete(0)
-# print(list_1)
-# list_1.delete(5)
-# print(list_1)
+	print(total_steps)
+	print(AVL1) 
 
 
+	### experiment 2
+	print("Experiment 2:")
+	for y in range(tree_size-1, -1, -1):
+		print(AVL1) 
+		print("deleting" + y)
+		index = random.randint(0, y) 
+		total_steps += AVL1.delete(index) 
+
+	print(total_steps)
+
+	### experiment 3
+	print("Experiment 3:")
+	AVL3 = AVLTreeList()
+	total_steps=0
+	for z in range(tree_size//2):
+		index = random.randint(0, z) 
+		AVL3.insert(index, z) 
+
+	for w in range(tree_size//2 -1, 0, -2):
+		index1 = random.randint(0, w) 
+		total_steps += AVL3.delete(index1)
 
 
-# listy_list = list_1.split(1)
-# print(listy_list[0])
-# print(listy_list[2])
-# listy_list[0].concat(list_2)
+		index2 = random.randint(0, w)   
+		AVL3.insert(index2, w) 
 
-# print(list_1.listToArray)
-# print(list_1.first())
-# print(list_1.last())
+	print(total_steps)
+	print("Done!")
 
-# list_empty = AVLTreeList()
-# print(list_empty.first())
-# print(list_empty.last())
-# print(list_empty.listToArray())
-# print(list_empty.retrieve(3))
-# print(list_empty.length())
-# print(list_empty.search("hagar"))
+Q_1(2)
 
-# list_empty2 = AVLTreeList()
-
-
-# list_empty3 = AVLTreeList()
-# print(list_empty2)
-# list_empty2.concat(list_empty3)
-# print(list_empty2)
-
-# list_1 = AVLTreeList()
-# insert_values1 = ["the","big","fat","orange","cat","slept","all","day"]
-# for i in range(len(insert_values1)):
-#     list_1.insert(i, insert_values1[i])
-
-# list_1.insert(0,"__")
-# list_1.insert(2,"__")
-# list_1.insert(4,"__")
-# list_1.insert(6,"__")
-# list_1.insert(8,"__")
-# list_1.insert(10,"__")
-# list_1.insert(12,"__")
-# list_1.insert(14,"__")
-# list_1.insert(16,"__")
-
-# print(list_1)
-# # print(list_1.listToArray())
-
-# #    [ _,"the",,"big",,"fat",,"orange",,"cat",,"slept",,"all",,"day",_]
-# lol = list_1.split(list_1.length()-2)
-# print(lol[0])
-# print(lol[1])
-# print(lol[2])
-# print(lol[0].listToArray())
-# print(lol[2].listToArray())
-# lol = list_1.split(2)
-# print(lol[0])
-# print(lol[1])
-# print(lol[2])
-# print(lol[0].listToArray())
-# print(lol[2].listToArray())
+# for i in range(10):
+#     Q_1(i+1)
