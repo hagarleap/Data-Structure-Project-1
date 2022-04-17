@@ -601,6 +601,7 @@ class AVLTreeList(object):
 	#time complexity: O(1)
 
 	def RightRotation(self, B):
+		#print(B.getBF())
 		B_is_root=False
 
 		if B.getParent() == None: ##if none then B is root
@@ -609,10 +610,14 @@ class AVLTreeList(object):
 			flag_B_left_child =  B.is_left_child()
 
 		A = B.getLeft()
+
 		B.setLeft(A.getRight())
-		A.setParent(B.getParent())
 		B.getLeft().setParent( B)
+
+		A.setParent(B.getParent())
+		
 		A.setRight(B)
+
 		if B_is_root:
 			self.root = A
 			
@@ -646,19 +651,23 @@ class AVLTreeList(object):
 			flag_B_left_child =  B.is_left_child()
 
 		A = B.getRight()
+
 		B.setRight(A.getLeft())
-		A.setParent(B.getParent())
 		B.getRight().setParent(B)
+
+		A.setParent(B.getParent())
+
 		A.setLeft(B)
+
 		if B_is_root:
 			self.root = A
 
 		else:	
 			
 			if flag_B_left_child:
-				A.getParent().setLeft( A)
+				A.getParent().setLeft(A)
 			else:
-				A.getParent().setRight( A)
+				A.getParent().setRight(A)
 
 		B.setParent(A)
 
@@ -734,7 +743,9 @@ class AVLTreeList(object):
 			y = node.getParent() 					#2		
 
 		if children == 0: 											#1.case_1  	
+			#print("case1")
 			if node == self.getRoot(): #only one node-root in the tree
+				#print("was root")
 				virtual_root = node.getRight()
 				virtual_root.setParent(None)
 				self.root = virtual_root
@@ -752,9 +763,10 @@ class AVLTreeList(object):
 				node.AVLdelete()  
 
 		elif children == 1:											#1.case_2
-			
+			#print("case2")
 			if hasLeft: 
 				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for height or size updates, just make it the root
+					#print("was root")
 					new_root = node.getLeft()
 					new_root.setParent(None)
 					self.root = new_root
@@ -774,6 +786,7 @@ class AVLTreeList(object):
 
 			else:
 				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for height or size updates, just make it the root
+					#print("was root")
 					new_root = node.getRight()
 					new_root.setParent(None)
 					self.root = new_root
@@ -792,10 +805,10 @@ class AVLTreeList(object):
 					node.AVLdelete()  
 
 		else:															#1.case_3
+			#print("case3")
 																					
 			successor = node.getSuccessor()
 
-		
 			if successor.getParent() != node:
 				y = successor.getParent()  									#because of successor being deleted node in terms of shape, we start fixing here
 			else:
@@ -810,6 +823,7 @@ class AVLTreeList(object):
 			successor.setParent(node.getParent())     					  #steal node's parent
 
 			if node == self.getRoot():
+				#print("was root")
 				self.root = successor
 
 			elif node.is_left_child():
@@ -823,18 +837,18 @@ class AVLTreeList(object):
 			successor.setLeft(node.getLeft())							#steal node's left child
 			successor.getLeft().setParent(successor)
 			
-			successor.updateMeasurements()
+			successor.setHeight(node.getHeight())
+			successor.setSize(node.getSize())
 			
 			node.AVLdelete()
 		
 		########## done with 1 and 2 ####################
 		########## start 3 ##############################
 	
+		
 			
 		balancing_steps = self.delete_style_balancing(y, balancing_steps)
 
-		if y != None: ###height may not change now but size certainly has
-				y.fix_size_rec()
 
 		return balancing_steps	
 			
@@ -853,7 +867,8 @@ class AVLTreeList(object):
 				balancing_steps = self.ImplementRotation(node, balancing_steps)
 				node = node_temp
 				
-	
+		if node != None: ###height may not change now but size certainly has
+			node.fix_size_rec()
 		return balancing_steps
 
 
@@ -1317,7 +1332,7 @@ def rightspace(row):
 import random
 def Q_1(i):
 	
-	print(f"Experiment {1}")
+	print(f"Experiment {i}")
 
 	tree_size = 1000*(2**i)
 
@@ -1327,18 +1342,16 @@ def Q_1(i):
 	total_steps=0
 	for x in range(tree_size):
 		index = random.randint(0, x) 
-		total_steps += AVL1.insert(index, x) 
+		total_steps += AVL1.insert(index, 'x') 
 
 	print(total_steps)
-	print(AVL1) 
+	 
 
 
 	### experiment 2
 	print("Experiment 2:")
 	for y in range(tree_size-1, -1, -1):
-		print(AVL1) 
-		print("deleting" + y)
-		index = random.randint(0, y) 
+		index = random.randint(0, y)
 		total_steps += AVL1.delete(index) 
 
 	print(total_steps)
@@ -1349,7 +1362,7 @@ def Q_1(i):
 	total_steps=0
 	for z in range(tree_size//2):
 		index = random.randint(0, z) 
-		AVL3.insert(index, z) 
+		AVL3.insert(index, 'x') 
 
 	for w in range(tree_size//2 -1, 0, -2):
 		index1 = random.randint(0, w) 
@@ -1362,7 +1375,6 @@ def Q_1(i):
 	print(total_steps)
 	print("Done!")
 
-Q_1(2)
 
-# for i in range(10):
-#     Q_1(i+1)
+for i in range(10):
+    Q_1(i+1)
