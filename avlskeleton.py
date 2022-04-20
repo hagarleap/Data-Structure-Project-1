@@ -7,7 +7,8 @@
 
 
 """A class represnting a node in an AVL tree"""
-
+import sys
+sys.setrecursionlimit(100000)
 from ast import Global
 from hashlib import new
 from logging import root
@@ -32,8 +33,8 @@ class AVLNode(object):
 		self.size = 0
 		self.HeightUpdate = False
 
-	def __repr__(self):
-		return "(" + str(self.val) + ")"
+	# def __repr__(self):
+	# 	return "(" + str(self.val) + ")"
 		
 
 	"""returns the left child
@@ -361,11 +362,11 @@ class AVLTreeList(object):
 		# add your fields here
 
 
-	def __repr__(self):
-		out = ""
-		for row in printree(self):  # need printree.py file
-			out = out + row + "\n"
-		return out
+	# def __repr__(self):
+	# 	out = ""
+	# 	for row in printree(self):  # need printree.py file
+	# 		out = out + row + "\n"
+	# 	return out
 
 
 	"""returns whether the list is empty
@@ -397,8 +398,9 @@ class AVLTreeList(object):
 	#  	return TreeSelectRec(x.left, i)
 	#  else:
 	# 		return TreeSelectRec(x.right, i-r) 
+	
 	def TreeSelect(self, i):
-
+		
 		def TreeSelectRec(x, i):
 			r = x.getLeft().getSize() + 1
 			if i==r:
@@ -1106,11 +1108,11 @@ class AVLTreeList(object):
 			join_node = big_tree.root
 
 			if (small_tree_first):  
-				while join_node.getHeight() > small_tree.root.getHeight(): #find the area of the join node
+				while join_node.getHeight() > small_tree.root.getHeight() and join_node.getHeight() != -1: #find the area of the join node
 					join_node = join_node.getLeft()
 
 			else:
-				while join_node.getHeight() > small_tree.root.getHeight(): #find the area of the join node
+				while join_node.getHeight() > small_tree.root.getHeight() and  join_node.getHeight() != -1: #find the area of the join node
 					join_node = join_node.getRight()	
 				  
 
@@ -1141,6 +1143,7 @@ class AVLTreeList(object):
 				x.setRight(small_tree.root)
 				x.setLeft(join_node)
 
+####stopped here keep fixing. check for case where both r empty!
 
 			if not is_equal:               
 				x.setParent(join_node.getParent())
@@ -1190,7 +1193,7 @@ class AVLTreeList(object):
 			T1height = T1.getRoot().getHeight()
 			T2Height = T2.getRoot().getHeight()
 
-			T2.min = T1.min		#update min and max
+			T2.min = T1.min		#update min and max !!! change if one tree is empty
 			T1.max = T2.max
 
 			if T1height < T2Height:
@@ -1275,10 +1278,6 @@ class AVLTreeList(object):
 		newNode = AVLNode(val)
 		balancing_steps = 0 #counting how many fixes to height and rotations
 
-		if i==0 :           #update min and max
-			self.min = newNode
-
-
 		#if empty tree, we create new tree
 		if self.empty():
 			self.root = newNode
@@ -1293,19 +1292,33 @@ class AVLTreeList(object):
 
 		#1
 		else:
-			if i==self.length() :
+			if i==self.length(): 
 				#insert last, last node has two virtual nodes, we insert in between last node and its virtual node
 				#the newNode, than make new leftVirtual to the newNode 
 				
-				last_node = self.TreeSelect(i)
+				last_node = self.max
 				virtualLeft = AVLNode(None)
 				virtualRight = last_node.getRight()
 				newNode.setRight(virtualRight)
 				newNode.setLeft(virtualLeft)
+				last_node.setRight(newNode)
+
 				virtualLeft.setParent(newNode)
 				virtualRight.setParent(newNode)
-				last_node.setRight(newNode)
 				newNode.setParent(last_node)
+
+			elif i == 0:
+				first_node = self.min
+				virtualRight = AVLNode(None)
+				virtualLeft = first_node.getLeft()
+				newNode.setRight(virtualRight)
+				newNode.setLeft(virtualLeft)
+				first_node.setLeft(newNode)
+
+				virtualLeft.setParent(newNode)
+				virtualRight.setParent(newNode)
+				newNode.setParent(first_node)
+
 
 			else:
 				currNode = self.TreeSelect(i+1)
@@ -1337,8 +1350,10 @@ class AVLTreeList(object):
 					virtualRight.setParent(newNode)
 					newNode.setParent(preNode)
 					
-			if i==self.length(): #updates max only after inserting the node, to help with case when list is empty
+			if i==self.length(): #updates max and min only after inserting the node, to help with case when list is empty
 				self.max = newNode
+			if i == 0:
+				self.min = newNode
 
 			newNode.updateMeasurements() #update size and height and balancing_steps without adding to BS since its a new node not updated node
 			#2
@@ -1548,65 +1563,63 @@ import random
 #     Q_2(i+1)
 
 
-# import sys
-# sys.setrecursionlimit(10000)
+def Q3(i):
 
-# def Q3(i):
+		print(f"Experiment {i}")
+		tree_size = 1000*i
 
-# 		print(f"Experiment {i}")
-# 		tree_size = 1000*i
+	### experiment Arithmetic progression
+		print("Experiment Arithmetic progression:")
+		AVL1 = AVLTreeList()
+		BST1 = AVLTreeList()
 
-# 	### experiment Arithmetic progression
-# 		print("Experiment Arithmetic progression:")
-# 		AVL1 = AVLTreeList()
-# 		BST1 = AVLTreeList()
+		total_steps_AVL=0
+		total_steps_BST=0
 
-# 		total_steps_AVL=0
-# 		total_steps_BST=0
+		for x in range(tree_size):
+			total_steps_AVL += AVL1.insert(0, x)
+			total_steps_BST += BST1.insert_BST(0, x)
+			print(x)
 
-# 		for x in range(tree_size):
-# 			total_steps_AVL += AVL1.insert(0, x)
-# 			total_steps_BST += BST1.insert_BST(0, x)
+		print(f"AVL: {total_steps_AVL}")
+		print(f"BST: {total_steps_BST}")
 
-# 		print(f"AVL: {total_steps_AVL}")
-# 		print(f"BST: {total_steps_BST}")
+	### experiment balance
+		print("Experiment balance:")
+		AVL2 = AVLTreeList()
+		BST2 = AVLTreeList()
 
-# 	### experiment balance
-# 		print("Experiment balance:")
-# 		AVL2 = AVLTreeList()
-# 		BST2 = AVLTreeList()
+		total_steps_AVL=0
+		total_steps_BST=0
+		x = 0
+		level = 0
+		while x < tree_size:
+			for h in range(0, (2**level)+1, 2):
+				total_steps_AVL += AVL2.insert(h, x)
+				total_steps_BST += BST2.insert_BST(h, x)
+				x +=1
+			level +=1
+		print(f"AVL: {total_steps_AVL}")
+		print(f"BST: {total_steps_BST}")
 
-# 		total_steps_AVL=0
-# 		total_steps_BST=0
-# 		x = 0
-# 		level = 0
-# 		while x < tree_size:
-# 			for h in range(0, (2**level)+1, 2):
-# 				total_steps_AVL += AVL2.insert(h, x)
-# 				total_steps_BST += BST2.insert_BST(h, x)
-# 				x +=1
-# 			level +=1
-# 		print(f"AVL: {total_steps_AVL}")
-# 		print(f"BST: {total_steps_BST}")
+	###experiment random
+		print("Experiment random:")
+		AVL3 = AVLTreeList()
+		BST3 = AVLTreeList()
 
-# 	###experiment random
-# 		print("Experiment random:")
-# 		AVL3 = AVLTreeList()
-# 		BST3 = AVLTreeList()
+		total_steps_AVL=0
+		total_steps_BST=0
 
-# 		total_steps_AVL=0
-# 		total_steps_BST=0
+		for x in range(tree_size):
+			index = random.randint(0, x) 
+			total_steps_AVL += AVL3.insert(index, index) 
+			total_steps_BST += BST3.insert_BST(index, index) 
 
-# 		for x in range(tree_size):
-# 			index = random.randint(0, x) 
-# 			total_steps_AVL += AVL3.insert(index, index) 
-# 			total_steps_BST += BST3.insert_BST(index, index) 
+		print(f"AVL: {total_steps_AVL}")
+		print(f"BST: {total_steps_BST}")
 
-# 		print(f"AVL: {total_steps_AVL}")
-# 		print(f"BST: {total_steps_BST}")
-
-# for i in range(10):
-#     Q3(i+1)
+for i in range(10):
+    Q3(i+4)
 
 
 
