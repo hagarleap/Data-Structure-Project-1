@@ -4,7 +4,7 @@
 #id2      - 318459666
 #name2    - Gal Kariel 
 
-
+##note to checker of this project: we created a separate insert for BST called insert_BST. it is an AVLtree function.
 
 """A class represnting a node in an AVL tree"""
 import sys
@@ -33,8 +33,8 @@ class AVLNode(object):
 		self.size = 0
 		self.HeightUpdate = False
 
-	# def __repr__(self):
-	# 	return "(" + str(self.val) + ")"
+	def __repr__(self):
+		return "(" + str(self.val) + ")"
 		
 
 	"""returns the left child
@@ -362,11 +362,11 @@ class AVLTreeList(object):
 		# add your fields here
 
 
-	# def __repr__(self):
-	# 	out = ""
-	# 	for row in printree(self):  # need printree.py file
-	# 		out = out + row + "\n"
-	# 	return out
+	def __repr__(self):
+		out = ""
+		for row in printree(self):  # need printree.py file
+			out = out + row + "\n"
+		return out
 
 
 	"""returns whether the list is empty
@@ -467,10 +467,6 @@ class AVLTreeList(object):
 		newNode = AVLNode(val)
 		balancing_steps = 0 #counting how many fixes to height and rotations
 
-		if i==0 :           #update min and max
-			self.min = newNode
-
-
 		#if empty tree, we create new tree
 		if self.empty():
 			self.root = newNode
@@ -481,23 +477,38 @@ class AVLTreeList(object):
 			newNode.setLeft(virtualLeft)
 			virtualLeft.setParent(newNode)
 			newNode.updateMeasurements()
+			self.min = newNode
 			self.max = newNode #max is now also the root
 
 		#1
 		else:
-			if i==self.length() :
+			if i==self.length(): 
 				#insert last, last node has two virtual nodes, we insert in between last node and its virtual node
 				#the newNode, than make new leftVirtual to the newNode 
 				
-				last_node = self.TreeSelect(i)
+				last_node = self.max
 				virtualLeft = AVLNode(None)
 				virtualRight = last_node.getRight()
 				newNode.setRight(virtualRight)
 				newNode.setLeft(virtualLeft)
+				last_node.setRight(newNode)
+
 				virtualLeft.setParent(newNode)
 				virtualRight.setParent(newNode)
-				last_node.setRight(newNode)
 				newNode.setParent(last_node)
+
+			elif i == 0:
+				first_node = self.min
+				virtualRight = AVLNode(None)
+				virtualLeft = first_node.getLeft()
+				newNode.setRight(virtualRight)
+				newNode.setLeft(virtualLeft)
+				first_node.setLeft(newNode)
+
+				virtualLeft.setParent(newNode)
+				virtualRight.setParent(newNode)
+				newNode.setParent(first_node)
+
 
 			else:
 				currNode = self.TreeSelect(i+1)
@@ -529,8 +540,10 @@ class AVLTreeList(object):
 					virtualRight.setParent(newNode)
 					newNode.setParent(preNode)
 					
-			if i==self.length(): #updates max only after inserting the node, to help with case when list is empty
+			if i==self.length(): #updates max and min only after inserting the node, to help with case when list is empty
 				self.max = newNode
+			if i == 0:
+				self.min = newNode
 
 			newNode.updateMeasurements() #update size and height and balancing_steps without adding to BS since its a new node not updated node
 			#2
@@ -538,7 +551,6 @@ class AVLTreeList(object):
 			y = newNode.getParent()
 			while y != None:
 				y.updateMeasurements()
-#### "if you want to turn AVL tree into regular BST tree, remove starting here" #######
 
 				if abs(y.getBF()) < 2 :
 					if not y.getHeightUpdate():
@@ -553,7 +565,6 @@ class AVLTreeList(object):
 			if y != None: ###height may not change now but size certainly has
 				y.fix_size_rec()
 
-#### "if you want to turn AVL tree into regular BST tree, stop removing here" ##########
 
 		return balancing_steps
 
@@ -815,8 +826,7 @@ class AVLTreeList(object):
 					node.AVLdelete()  
 
 		else:															#1.case_3
-			#print("case3")
-																					
+			#print("case3")																
 			successor = node.getSuccessor()
 
 			if successor.getParent() != node:
@@ -1105,7 +1115,8 @@ class AVLTreeList(object):
 	def AVL_join(T1, T2, x):
 
 		def join(small_tree, big_tree, x, is_equal , small_tree_first): #joins given that small_tree <= big_tree
-			join_node = big_tree.root
+
+			join_node = big_tree.root ##if both trees empty, root height -1 
 
 			if (small_tree_first):  
 				while join_node.getHeight() > small_tree.root.getHeight() and join_node.getHeight() != -1: #find the area of the join node
@@ -1126,7 +1137,7 @@ class AVLTreeList(object):
 					return True
 				return False
 
-			if not is_equal:   #avoiding virtual nodes!
+			if not is_equal:   #avoiding virtual nodes! esp it both trees empty
 				join_node = join_node.getParent()
 				if (small_tree_first):
 					if has_left_child(join_node):
@@ -1136,19 +1147,18 @@ class AVLTreeList(object):
 						join_node = join_node.getRight() 
 
 			
-			if (small_tree_first):  #pointers for x for all cases (also in Isequael == TRUE)
+			if (small_tree_first):  #pointers for x for all cases (also in isEqual == TRUE). if both trees empty then isequal == true, and this is fine- x now has 2 virtual nodes!
 				x.setLeft(small_tree.root)
 				x.setRight(join_node)
 			else:
 				x.setRight(small_tree.root)
 				x.setLeft(join_node)
 
-####stopped here keep fixing. check for case where both r empty!
 
 			if not is_equal:               
 				x.setParent(join_node.getParent())
 				if (small_tree_first):
-					if x.getParent() != None: 
+					if x.getParent() != None:					 #in case x took place of root
 						x.getParent().setLeft(x)
 						if x.getParent().getRight() ==join_node: #in case right child of parent points to joinnode, got to get rid of pointer
 							virtual_node = AVLNode(None)
@@ -1156,7 +1166,7 @@ class AVLTreeList(object):
 					else:
 						big_tree.root = x
 				else:
-					if x.getParent() != None:
+					if x.getParent() != None:					#in case x took place of root
 						x.getParent().setRight(x)
 						if x.getParent().getLeft() ==join_node: #in case left child of parent points to joinnode, got to get rid of pointer
 							virtual_node = AVLNode(None)
@@ -1166,45 +1176,57 @@ class AVLTreeList(object):
 			else:
 				big_tree.root = x
 			
-			small_tree.root.setParent(x)
+			small_tree.root.setParent(x) 						#finally set pointers back to x
 			join_node.setParent(x)
 
 			#now big tree conatins small tree
-			big_tree.root.setParent(None)
+			big_tree.root.setParent(None)			#a fix in case x was not an empty node previously, like in split
 			big_tree.delete_style_balancing(x, 0)   #balancing the tree, we dont need balancing steps info, so we put bs number
-			small_tree.root = big_tree.root
+			small_tree.root = big_tree.root			#now both trees point to the same, joined tree
 			return big_tree
 
-		#if one of the tree is empty, we will use insert instead of join
-		if T1.empty():
-			T2.insert(0, x.getValue()) #insert first
-			T1.root = T2.root
-			T1.min = T2.min
+		#gets T1 and T2 heights for isequal/ small tree first data later on
+
+		T1height = None
+		T2height = None
+
+		if not T1.empty():
+			T1height = T1.getRoot().getHeight()
+		else:
+			T1height = -1
+
+		if not T2.empty():
+			T2height = T2.getRoot().getHeight()
+		else:
+			T2height = -1
+
+												#update min and max in the case that:
+		if T1height == -1:    					#T1 is empty
+			if T2height == -1:					#T1 and T2 are both empty
+				T2.min = x
+				T2.max = x
+				T1.min = x
+				T1.max = x
+			else:								#T2 is empty
+				T2.min = x
+				T1.min = x
+				T1.max = T2.max			
+		elif T2height == -1:
+			T1.max = x
+			T2.min = T1.min
+			T2.max = x
+		else:									#neither are empty
+			T2.min = T1.min		
 			T1.max = T2.max
-			return T2
-		elif T2.empty():
-			T1.insert(T1.length() , x.getValue()) #insert last
-			T2.root = T1.root
-			T2.min = T1.min 
-			T2.max = T1.max
-			return T1
+
+		if T1height < T2height:
+			return join(T1, T2, x, False, True)  #small_tree_first = true
+
+		elif T1height > T2height:
+			return join(T2,T1, x, False, False)  #small_tree_first = false
 
 		else:
-			T1height = T1.getRoot().getHeight()
-			T2Height = T2.getRoot().getHeight()
-
-			T2.min = T1.min		#update min and max !!! change if one tree is empty
-			T1.max = T2.max
-
-			if T1height < T2Height:
-				
-				return join(T1, T2, x, False, True)  #small_tree_first = true
-			elif T1height > T2Height:
-				
-				return join(T2,T1, x, False, False)  #small_tree_first = false
-			else:
-				
-				return join(T1, T2, x, True, True)  #save order 
+			return join(T1, T2, x, True, True)  #save order. correct for case if both are empty 
 
 		
 
@@ -1288,6 +1310,7 @@ class AVLTreeList(object):
 			newNode.setLeft(virtualLeft)
 			virtualLeft.setParent(newNode)
 			newNode.updateMeasurements()
+			self.min = newNode
 			self.max = newNode #max is now also the root
 
 		#1
@@ -1355,28 +1378,21 @@ class AVLTreeList(object):
 			if i == 0:
 				self.min = newNode
 
-			newNode.updateMeasurements() #update size and height and balancing_steps without adding to BS since its a new node not updated node
+			newNode.updateMeasurements() #update size and height without adding to balancing_steps since its a new node not updated node
 			#2
 
 			y = newNode.getParent()
 			while y != None:
 				y.updateMeasurements()
 
-
-			#### "if you want to turn AVL tree into regular BST tree, remove starting here" 
-
 				if not y.getHeightUpdate():
 						break
 				else:
 					y = y.getParent()
 					balancing_steps += 1
-			# 	else: #getBF(y)=2
-			# 		balancing_steps = self.ImplementRotation( y, balancing_steps)
-			# 		break
 
 			if y != None: ###height may not change now but size certainly has
 				y.fix_size_rec()
-			#### "if you want to turn AVL tree into regular BST tree, stop removing here"
 
 		return balancing_steps
 
@@ -1579,7 +1595,7 @@ def Q3(i):
 		for x in range(tree_size):
 			total_steps_AVL += AVL1.insert(0, x)
 			total_steps_BST += BST1.insert_BST(0, x)
-			print(x)
+			#print(x)
 
 		print(f"AVL: {total_steps_AVL}")
 		print(f"BST: {total_steps_BST}")
@@ -1619,7 +1635,7 @@ def Q3(i):
 		print(f"BST: {total_steps_BST}")
 
 for i in range(10):
-    Q3(i+4)
+    Q3(i+1)
 
 
 
