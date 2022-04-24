@@ -15,8 +15,7 @@ from logging import root
 
 
 class AVLNode(object):
-	"""Constructor, you are allowed to add more fields. 
-
+	"""Constructor:
 	@type value: str
 	@param value: data of your node
 	@type size: int
@@ -33,6 +32,10 @@ class AVLNode(object):
 		self.size = 0
 		self.HeightUpdate = False
 
+
+	""" @rtype: String
+		@returns: string representation of the node's value, encased in parentheses. For use in printing the tree.
+	"""
 	def __repr__(self):
 		return "(" + str(self.val) + ")"
 		
@@ -77,7 +80,6 @@ class AVLNode(object):
 	def getHeight(self):
 		return self.height
 
-	# new size that we added
 	"""returns the size
 
 	@rtype: int
@@ -86,8 +88,6 @@ class AVLNode(object):
 	def getSize(self):
 		return self.size
 
-
-	#new field that we added
 	"""returns if HeightUpdate in the last updateMeserments
 
 	@rtype: bool
@@ -96,7 +96,6 @@ class AVLNode(object):
 	def getHeightUpdate(self):
 		return self.HeightUpdate
 
-
 	"""sets left child
 
 	@type node: AVLNode
@@ -104,7 +103,7 @@ class AVLNode(object):
 	"""
 	def setLeft(self, node):
 		self.left = node
-	#	return None
+
 
 	"""sets right child
 
@@ -113,7 +112,6 @@ class AVLNode(object):
 	"""
 	def setRight(self, node):
 		self.right = node
-		# return None
 
 	"""sets parent
 
@@ -122,7 +120,6 @@ class AVLNode(object):
 	"""
 	def setParent(self, node):
 		self.parent = node
-		# return None
 
 	"""sets value
 
@@ -131,7 +128,6 @@ class AVLNode(object):
 	"""
 	def setValue(self, value):
 		self.value = value
-		# return None
 
 	"""sets the balance factor of the node
 
@@ -140,8 +136,6 @@ class AVLNode(object):
 	"""
 	def setHeight(self, h):
 		self.height = h
-		# return None
-
 
 	"""sets the HeightUpdate of the node
 
@@ -160,7 +154,6 @@ class AVLNode(object):
 	"""
 	def setSize(self, x):
 		self.size = x
-		# return None
 
 	"""returns whether self is not a virtual node 
 
@@ -173,16 +166,18 @@ class AVLNode(object):
 		return True
 
 	"""update size and height and HeightUpdate of Node 
+
 	@pre: node is real
 	@returns: None
 	"""
 	#time complexity: O(1)
-	def updateMeasurements(self):	
+	def updateMeasurements(self):
+		#update height	
 		oldHeight = self.getHeight()
 		leftheight= self.getLeft().getHeight()
 		rightheight = self.getRight().getHeight()
 		newheight = max(leftheight, rightheight)+1
-		if (oldHeight==newheight): #y height hasn't changed
+		if (oldHeight==newheight): #node's height hasn't changed
 			self.setHeightUpdate(False)
 		else:	
 			self.setHeight(newheight)
@@ -194,15 +189,21 @@ class AVLNode(object):
 		newsize = rightsize + leftsize + 1
 		self.setSize(newsize)	
 
+	"""update size of all nodes starting at given node til root. Useful in insert/delete/join/split. 
+
+	@pre: node is real
+	@returns: None
+	"""
+	#time complexity: O(log(n))
 
 	def fix_size_rec(self):
 		while self != None:
-			rightsize = self.getRight().getSize()
-			leftsize  = self.getLeft().getSize()
-			newsize = rightsize + leftsize + 1
-			self.setSize(newsize)
+				rightsize = self.getRight().getSize()
+				leftsize  = self.getLeft().getSize()
+				newsize = rightsize + leftsize + 1
+				self.setSize(newsize)
 
-			self = self.getParent()
+				self = self.getParent()
 
 
 
@@ -382,7 +383,7 @@ class AVLTreeList(object):
 		return False
 
 
-	"""retrieves the value of the i'th item in the list
+	"""retrieves the node of the i'th item in the list
 
 	@type i: int
 	@pre: 1 <= i < self.length()
@@ -450,12 +451,12 @@ class AVLTreeList(object):
 	"""
 	# Insert(L,i,z):
 	# if i=n (|L|=n):
-  	# 	 1.1 find the maximum and make z its right child
+	# 	 1.1 find the maximum and make z its right child
 	# else (i<n):
-  	# 	2.1 find the current node of rank i+1 (indices begin at 0)
-  	# 	2.2 if it has no left child:
+	# 	2.1 find the current node of rank i+1 (indices begin at 0)
+	# 	2.2 if it has no left child:
 	# 		2.2.1 make z its left child.
-  	#   	2.3 else:
+	#   	2.3 else:
 	#  		2.3.1 find its predecessor
 	# 		2.3.2 make z its right child
 	# 3.  fix the tree
@@ -665,7 +666,7 @@ class AVLTreeList(object):
 	def LeftRotation(self, B):
 		B_is_root=False
 		
-			 
+			
 		if B == self.getRoot():
 			B_is_root = True
 		else:
@@ -969,9 +970,9 @@ class AVLTreeList(object):
 	#find node in place i, than go up to the root and join bigger subtrees to Large tree, and smaller subtrees to Small Tree
 	def split(self, i):
 		
-		# height_difference = 0
-		# join_count = 0
-		# max_diff = 0
+		height_difference = 0
+		join_count = 0
+		max_diff = 0
 
 		x = self.TreeSelect(i+1)
 		val_x = x.getValue()
@@ -1040,11 +1041,11 @@ class AVLTreeList(object):
 				temp_bigger_tree.min = temp_bigger_tree.root
 				temp_bigger_tree.max = temp_bigger_tree.root
 				
-				# new_diff = abs(large_tree.root.getHeight() - temp_bigger_tree.root.getHeight())
-				# height_difference += new_diff
-				# join_count += 1
-				# if max_diff < new_diff:
-				# 	max_diff = new_diff
+				new_diff = abs(large_tree.root.getHeight() - temp_bigger_tree.root.getHeight())
+				height_difference += new_diff
+				join_count += 1
+				if max_diff < new_diff:
+					max_diff = new_diff
 				large_tree = large_tree.AVL_join(temp_bigger_tree, y)
 
 			else:  
@@ -1062,11 +1063,11 @@ class AVLTreeList(object):
 				temp_smaller_tree.max = temp_smaller_tree.root
 
 
-				# new_diff = abs(small_tree.root.getHeight() - temp_smaller_tree.root.getHeight())
-				# height_difference += new_diff
-				# join_count += 1
-				# if max_diff < new_diff:
-				# 	max_diff = new_diff
+				new_diff = abs(small_tree.root.getHeight() - temp_smaller_tree.root.getHeight())
+				height_difference += new_diff
+				join_count += 1
+				if max_diff < new_diff:
+					max_diff = new_diff
 				small_tree = temp_smaller_tree.AVL_join(small_tree, y )
 
 			y = z  #go up to the parent
@@ -1077,7 +1078,7 @@ class AVLTreeList(object):
 		large_tree.min = large_tree_min
 		large_tree.max = large_tree_max
 
-		# print(f"max: {max_diff} \n average : {height_difference/join_count}")
+		print(f"max: {max_diff} \n average : {height_difference/join_count}")
 		return [small_tree ,val_x, large_tree]
 
 	"""concatenates lst to self
@@ -1125,7 +1126,7 @@ class AVLTreeList(object):
 			else:
 				while join_node.getHeight() > small_tree.root.getHeight() and  join_node.getHeight() != -1: #find the area of the join node
 					join_node = join_node.getRight()	
-				  
+				
 
 			def has_left_child(node):
 				if node.getLeft().isRealNode():
@@ -1407,74 +1408,74 @@ class AVLTreeList(object):
 ###################################################### function ######################################################
 
 def printree(t, bykey=False):
-    """Print a textual representation of t
-    bykey=True: show keys instead of values"""
-    return trepr(t, t.root, bykey)
+	"""Print a textual representation of t
+	bykey=True: show keys instead of values"""
+	return trepr(t, t.root, bykey)
 
 
 def trepr(t, node, bykey=False):
-    """Return a list of textual representations of the levels in t
-    bykey=True: show keys instead of values"""
-    if not node.isRealNode():  # You might want to change this, depending on your implementation
-        return ["#"]    # Hashtag marks a virtual node
+	"""Return a list of textual representations of the levels in t
+	bykey=True: show keys instead of values"""
+	if not node.isRealNode():  # You might want to change this, depending on your implementation
+		return ["#"]    # Hashtag marks a virtual node
 
-    thistr = str(node.getValue())
+	thistr = str(node.getValue())
 
-    return conc(trepr(t, node.getLeft(), bykey), thistr, trepr(t, node.getRight(), bykey))
+	return conc(trepr(t, node.getLeft(), bykey), thistr, trepr(t, node.getRight(), bykey))
 
 
 def conc(left, root, right):
-    """Return a concatenation of textual representations of
-    a root node, its left node, and its right node
-    root is a string, and left and right are lists of strings"""
+	"""Return a concatenation of textual representations of
+	a root node, its left node, and its right node
+	root is a string, and left and right are lists of strings"""
 
-    lwid = len(left[-1])
-    rwid = len(right[-1])
-    rootwid = len(root)
+	lwid = len(left[-1])
+	rwid = len(right[-1])
+	rootwid = len(root)
 
-    result = [(lwid + 1) * " " + root + (rwid + 1) * " "]
+	result = [(lwid + 1) * " " + root + (rwid + 1) * " "]
 
-    ls = leftspace(left[0])
-    rs = rightspace(right[0])
-    result.append(ls * " " + (lwid - ls) * "_" + "/" + rootwid * " " + "\\" + rs * "_" + (rwid - rs) * " ")
+	ls = leftspace(left[0])
+	rs = rightspace(right[0])
+	result.append(ls * " " + (lwid - ls) * "_" + "/" + rootwid * " " + "\\" + rs * "_" + (rwid - rs) * " ")
 
-    for i in range(max(len(left), len(right))):
-        row = ""
-        if i < len(left):
-            row += left[i]
-        else:
-            row += lwid * " "
+	for i in range(max(len(left), len(right))):
+		row = ""
+		if i < len(left):
+			row += left[i]
+		else:
+			row += lwid * " "
 
-        row += (rootwid + 2) * " "
+		row += (rootwid + 2) * " "
 
-        if i < len(right):
-            row += right[i]
-        else:
-            row += rwid * " "
+		if i < len(right):
+			row += right[i]
+		else:
+			row += rwid * " "
 
-        result.append(row)
+		result.append(row)
 
-    return result
+	return result
 
 
 def leftspace(row):
-    """helper for conc"""
-    # row is the first row of a left node
-    # returns the index of where the second whitespace starts
-    i = len(row) - 1
-    while row[i] == " ":
-        i -= 1
-    return i + 1
+	"""helper for conc"""
+	# row is the first row of a left node
+	# returns the index of where the second whitespace starts
+	i = len(row) - 1
+	while row[i] == " ":
+		i -= 1
+	return i + 1
 
 
 def rightspace(row):
-    """helper for conc"""
-    # row is the first row of a right node
-    # returns the index of where the first whitespace ends
-    i = 0
-    while row[i] == " ":
-        i += 1
-    return i
+	"""helper for conc"""
+	# row is the first row of a right node
+	# returns the index of where the first whitespace ends
+	i = 0
+	while row[i] == " ":
+		i += 1
+	return i
 
 
 
@@ -1495,11 +1496,12 @@ import random
 # 		total_steps += AVL1.insert(index, 'x') 
 
 # 	print(total_steps)
-	 
+	
 
 
 # 	### experiment 2
 # 	print("Experiment 2:")
+# 	total_steps=0
 # 	for y in range(tree_size-1, -1, -1):
 # 		index = random.randint(0, y)
 # 		total_steps += AVL1.delete(index) 
@@ -1520,7 +1522,7 @@ import random
 
 
 # 		index2 = random.randint(0, w)   
-# 		AVL3.insert(index2, w) 
+# 		total_steps += AVL3.insert(index2, w) 
 
 # 	print(total_steps)
 # 	print("Done!")
@@ -1530,112 +1532,131 @@ import random
 #     Q_1(i+1)
 
 
-###experiment 2
+##experiment 2
 
-# def max_in_left(avl_tree):
-# 	node = avl_tree.getRoot()
-# 	if node == None:
-# 		print("Fail")
-# 		return None
-# 	else:
-# 		node = node.getLeft()
-# 		while node.isRealNode():
-# 			node = node.getRight()
+def max_in_left(avl_tree):
+	node = avl_tree.getRoot()
+	if node == None:
+		print("Fail")
+		return None
+	else:
+		node = node.getLeft()
+		while node.isRealNode():
+			node = node.getRight()
 		
-# 		return node.getParent().Tree_rank()
+		return node.getParent().Tree_rank()
 
 
-# def Q_2(i):
+def Q_2(i):
 	
-# 	print(f"Experiment {i}")
+	print(f"Experiment {i}")
 
-# 	tree_size = 1000*(2**i)
+	tree_size = 1000*(2**i)
 
-# 	### experiment random
-# 	print("Experiment random:")
-# 	AVL1 = AVLTreeList()
-# 	total_steps=0
+	### experiment random
+	print("Experiment random:")
+	AVL1 = AVLTreeList()
 
-# 	for x in range(tree_size):
-# 		index = random.randint(0, x) 
-# 		AVL1.insert(index, 'x') 
+	for x in range(tree_size):
+		index = random.randint(0, x) 
+		AVL1.insert(index, 'x') 
 	
-# 	random_split_index = random.randint(0, tree_size-1) 
-# 	AVL1.split(random_split_index)
+	random_split_index = random.randint(0, tree_size-1) 
+	AVL1.split(random_split_index)
 
-# 	### experiment min max
-# 	print("Experiment min-max:")
-# 	AVL2 = AVLTreeList()
-# 	total_steps=0
+	### experiment min max
+	print("Experiment min-max:")
+	AVL2 = AVLTreeList()
 
-# 	for x in range(tree_size):
-# 		index = random.randint(0, x) 
-# 		AVL2.insert(index, 'x') 
+
+	for x in range(tree_size):
+		index = random.randint(0, x) 
+		AVL2.insert(index, 'x') 
 	
-# 	minmax_split_index = max_in_left(AVL2)
-# 	AVL2.split(minmax_split_index)
-
-# for i in range(10):
-#     Q_2(i+1)
-
-
-def Q3(i):
-
-		print(f"Experiment {i}")
-		tree_size = 1000*i
-
-	### experiment Arithmetic progression
-		print("Experiment Arithmetic progression:")
-		AVL1 = AVLTreeList()
-		BST1 = AVLTreeList()
-
-		total_steps_AVL=0
-		total_steps_BST=0
-
-		for x in range(tree_size):
-			total_steps_AVL += AVL1.insert(0, x)
-			total_steps_BST += BST1.insert_BST(0, x)
-			#print(x)
-
-		print(f"AVL: {total_steps_AVL}")
-		print(f"BST: {total_steps_BST}")
-
-	### experiment balance
-		print("Experiment balance:")
-		AVL2 = AVLTreeList()
-		BST2 = AVLTreeList()
-
-		total_steps_AVL=0
-		total_steps_BST=0
-		x = 0
-		level = 0
-		while x < tree_size:
-			for h in range(0, (2**level)+1, 2):
-				total_steps_AVL += AVL2.insert(h, x)
-				total_steps_BST += BST2.insert_BST(h, x)
-				x +=1
-			level +=1
-		print(f"AVL: {total_steps_AVL}")
-		print(f"BST: {total_steps_BST}")
-
-	###experiment random
-		print("Experiment random:")
-		AVL3 = AVLTreeList()
-		BST3 = AVLTreeList()
-
-		total_steps_AVL=0
-		total_steps_BST=0
-
-		for x in range(tree_size):
-			index = random.randint(0, x) 
-			total_steps_AVL += AVL3.insert(index, index) 
-			total_steps_BST += BST3.insert_BST(index, index) 
-
-		print(f"AVL: {total_steps_AVL}")
-		print(f"BST: {total_steps_BST}")
+	minmax_split_index = max_in_left(AVL2)
+	print(AVL2)
+	AVL2.split(minmax_split_index)
 
 for i in range(10):
-    Q3(i+1)
+	Q_2(i+1)
+
+
+# def Q3(i):
+
+# 		print(f"Experiment {i}")
+# 		tree_size = 1000*i
+
+# 	### experiment Arithmetic progression
+# 		print("Experiment Arithmetic progression:")
+# 		AVL1 = AVLTreeList()
+# 		BST1 = AVLTreeList()
+
+# 		total_steps_AVL=0
+# 		total_steps_BST=0
+# 		total_depth_AVL=0
+# 		total_depth_BST=0
+
+# 		for x in range(tree_size):
+# 			total_steps_AVL += AVL1.insert(0, x)
+# 			total_depth_AVL+= AVL1.root.getHeight() - AVL1.TreeSelect(1).getHeight()
+# 			total_steps_BST += BST1.insert_BST(0, x)
+# 			total_depth_BST += x
+# 			#print(x)
+
+# 		print(f"AVL: {total_steps_AVL/tree_size}")
+# 		print(f"BST: {total_steps_BST/tree_size}")
+# 		print(f"AVL: {total_depth_AVL/tree_size}")
+# 		print(f"BST: {total_depth_BST/tree_size}")
+
+# 	### experiment balance
+# 		print("Experiment balance:")
+# 		AVL2 = AVLTreeList()
+# 		BST2 = AVLTreeList()
+
+# 		total_steps_AVL=0
+# 		total_steps_BST=0
+# 		total_depth_AVL=0
+# 		total_depth_BST=0		
+# 		x = 0
+# 		level = 0
+# 		while x < tree_size:
+# 			for h in range(0, (2**level)+1, 2):
+# 				total_steps_AVL += AVL2.insert(h, x)
+# 				total_steps_BST += BST2.insert_BST(h, x)
+# 				total_depth_AVL+= AVL2.root.getHeight() - AVL2.TreeSelect(x+1).getHeight()
+# 				total_depth_BST+= BST2.root.getHeight() - BST2.TreeSelect(x+1).getHeight()
+# 				x +=1
+# 			level +=1
+# 		print(f"AVL: {total_steps_AVL/tree_size}")
+# 		print(f"BST: {total_steps_BST/tree_size}")
+# 		print(f"AVL: {total_depth_AVL/tree_size}")
+# 		print(f"BST: {total_depth_BST/tree_size}")
+
+# 	###experiment random
+# 		print("Experiment random:")
+# 		AVL3 = AVLTreeList()
+# 		BST3 = AVLTreeList()
+
+# 		total_steps_AVL=0
+# 		total_steps_BST=0
+# 		total_depth_AVL=0
+# 		total_depth_BST=0
+
+# 		for x in range(tree_size):
+# 			index = random.randint(0, x) 
+# 			total_steps_AVL += AVL3.insert(index, index) 
+# 			total_steps_BST += BST3.insert_BST(index, index)
+# 			total_depth_AVL+= AVL3.root.getHeight() - AVL3.TreeSelect(index+1).getHeight()
+# 			total_depth_BST+= BST3.root.getHeight() - BST3.TreeSelect(index+1).getHeight()
+
+# 		print(f"AVL: {total_steps_AVL/tree_size}")
+# 		print(f"BST: {total_steps_BST/tree_size}")
+# 		print(f"AVL: {total_depth_AVL/tree_size}")
+# 		print(f"BST: {total_depth_BST/tree_size}")
+
+
+# for i in range(10):
+#     Q3(i+1)
 
 
 
