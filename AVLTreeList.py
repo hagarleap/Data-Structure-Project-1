@@ -28,15 +28,7 @@ class AVLNode(object):
 		self.parent = None
 		self.height = -1
 		self.size = 0
-		self.HeightUpdate = False
-
-
-	""" @rtype: String
-		@returns: string representation of the node's value, encased in parentheses. For use in printing the tree.
-	"""
-	def __repr__(self):
-		return "(" + str(self.val) + ")"
-		
+		self.HeightUpdate = False	
 
 	"""returns the left child
 	@rtype: AVLNode
@@ -367,6 +359,7 @@ class AVLTreeList(object):
 	@returns: True if the list is empty, False otherwise
 	"""
    #time complexity: O(1)
+
 	def empty(self):
 		if not self.root.isRealNode():
 			return True
@@ -422,18 +415,6 @@ class AVLTreeList(object):
 	@rtype: list
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	# Insert(L,i,z):
-	# if i=n (|L|=n):
-	# 	 1.1 find the maximum and make z its right child
-	# else (i<n):
-	# 	2.1 find the current node of rank i+1 (indices begin at 0)
-	# 	2.2 if it has no left child:
-	# 		2.2.1 make z its left child.
-	#   	2.3 else:
-	#  		2.3.1 find its predecessor
-	# 		2.3.2 make z its right child
-	# 3.  fix the tree
-
 	#time complexity: O(log(n))
 
 	def insert(self, i, val):
@@ -447,10 +428,12 @@ class AVLTreeList(object):
 			virtualRight = AVLNode(None)
 			virtualLeft = AVLNode(None)
 			newNode.setRight(virtualRight)
-			virtualRight.setParent(newNode)
 			newNode.setLeft(virtualLeft)
-			virtualLeft.setParent(newNode)
 			newNode.updateMeasurements()
+
+			virtualLeft.setParent(newNode)
+			virtualRight.setParent(newNode)
+
 			self.min = newNode
 			self.max = newNode #max is now also the root
 
@@ -471,7 +454,14 @@ class AVLTreeList(object):
 				virtualRight.setParent(newNode)
 				newNode.setParent(last_node)
 
-			elif i == 0:
+			elif i == 0:	
+				#similar idea to inserting in last, but in first.
+				#important note: in the grand scheme of things, this is a tiny amount of optimization (since its only relevant to when we insert first or last)
+				#before, we used Treeselect to find all indexes
+				#but then we found that running tests for Q3 (when we insert first a bunch of times) took a TON of time 
+				# (and sometimes recursion limit was hit, so eventually impossible) 
+				#so we use min and max just for these two
+
 				first_node = self.min
 				virtualRight = AVLNode(None)
 				virtualLeft = first_node.getLeft()
@@ -546,20 +536,6 @@ class AVLTreeList(object):
 	@pre: node is real
 	@returns: amount of balancing steps so far
 	"""
-	# 	rotation(node)
-		# if BF == -2
-		# 	if getBF(getright) == -1:
-		# 		Left rotation
-				
-		# 	else:
-		# 		right rotation
-		# 		left rotation
-		# else:
-		# 	if getBF(getleft) == +1
-		# 		right rotation
-		# 	else:
-		# 		left rotation
-		# right rotation
 
 		#time complexity O(1)
 
@@ -596,13 +572,13 @@ class AVLTreeList(object):
 	#time complexity: O(1)
 
 	def RightRotation(self, B):
-		#print(B.getBF())
+		
 		B_is_root=False
 
 		if B.getParent() == None: ##if none then B is root
 			B_is_root = True
 		else:
-			flag_B_left_child =  B.is_left_child()
+			flag_B_left_child =  B.is_left_child()  #need to save this to avoid running is_left_child on root - will result in error. 
 
 		A = B.getLeft()
 
@@ -617,7 +593,7 @@ class AVLTreeList(object):
 			self.root = A
 			
 
-		else:	
+		else:	#set parent's new child in right spot (left or right son)
 			if flag_B_left_child:
 				A.getParent().setLeft( A)
 			else:
@@ -637,8 +613,8 @@ class AVLTreeList(object):
 	#time complexity: O(1)
 	
 	def LeftRotation(self, B):
+
 		B_is_root=False
-		
 			
 		if B == self.getRoot():
 			B_is_root = True
@@ -671,20 +647,6 @@ class AVLTreeList(object):
 		B.setSize( B.getLeft().getSize() + B.getRight().getSize() + 1 )
 		A.setSize(A.getLeft().getSize() + A.getRight().getSize() + 1 )
 
-
-
-
-
-		
-
-
-
-		
-
-
-
-
-
 	"""deletes the i'th item in the list
 
 	@type i: int
@@ -693,22 +655,7 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-# 	AVL-Delete(T, 𝒛)
-
-# 0. check if root for edge case
-
-# 1. Case 1: 𝑥 is a leaf
-	# Case 2: 𝑥 has only one child
-	# Case 3: If 𝑥 has two children
-
-# 2. Let 𝑦 be the parent of the (physically) deleted node.
-# 3. while 𝑦 ≠ 𝑁𝑢𝑙𝑙 do:
-	# 3.1. compute 𝐵𝐹(𝑦)*
-	# 3.2. if |𝐵𝐹(𝑦)| < 2 and 𝑦’s height hasn’t changed: terminate
-	# 3.3. else if |𝐵𝐹(𝑦)| < 2 and 𝑦’s height changed: go back to stage 3 with 𝑦’s parent
-	# 3.4. else (|𝐵𝐹(𝑦)| = 2): perform a rotation and go back to stage 3 with 𝑦’s parent
-
-
+	#time complexity: O(log(n))
 
 	def delete(self, i):
 
@@ -738,9 +685,7 @@ class AVLTreeList(object):
 			y = node.getParent() 					#2		
 
 		if children == 0: 											#1.case_1  	
-			#print("case1")
 			if node == self.getRoot(): #only one node-root in the tree
-				#print("was root")
 				virtual_root = node.getRight()
 				virtual_root.setParent(None)
 				self.root = virtual_root
@@ -758,10 +703,8 @@ class AVLTreeList(object):
 				node.AVLdelete()  
 
 		elif children == 1:											#1.case_2
-			#print("case2")
 			if hasLeft: 
 				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for height or size updates, just make it the root
-					#print("was root")
 					new_root = node.getLeft()
 					new_root.setParent(None)
 					self.root = new_root
@@ -781,7 +724,6 @@ class AVLTreeList(object):
 
 			else:
 				if node == self.getRoot():							#if node is root&has child, that child has no children. no need for height or size updates, just make it the root
-					#print("was root")
 					new_root = node.getRight()
 					new_root.setParent(None)
 					self.root = new_root
@@ -799,8 +741,7 @@ class AVLTreeList(object):
 					y.setRight( node.getRight())
 					node.AVLdelete()  
 
-		else:															#1.case_3
-			#print("case3")																
+		else:															#1.case_3															
 			successor = node.getSuccessor()
 
 			if successor.getParent() != node:
@@ -817,7 +758,6 @@ class AVLTreeList(object):
 			successor.setParent(node.getParent())     					  #steal node's parent
 
 			if node == self.getRoot():
-				#print("was root")
 				self.root = successor
 
 			elif node.is_left_child():
@@ -838,8 +778,6 @@ class AVLTreeList(object):
 		
 		########## done with 1 and 2 ####################
 		########## start 3 ##############################
-	
-		
 			
 		balancing_steps = self.delete_style_balancing(y, balancing_steps)
 
@@ -847,11 +785,11 @@ class AVLTreeList(object):
 		return balancing_steps
 
 
-	"""deletes the i'th item in the list
+	"""maintains shape of tree after delete and join!
 
-	@type i: int
-	@pre: 0 <= i < self.length()
-	@param i: The intended index in the list to be deleted
+	@type node: AVLNode
+	@param node: node that we start fixing and up
+	@type  balancing_steps: int
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""	
@@ -911,9 +849,8 @@ class AVLTreeList(object):
 	@rtype: list
 	@returns: a list of strings representing the data structure
 	"""
-	#did a tree walk with global list result, just like you would in BTS
+	#did a tree walk with global list result, just like you would in BST
 	#complexity: O(n)
-	'''CHECK THAT THIS WORKS, MIGHT NEED TO ADD BASE CASE WITH RETURNS'''
 
 	def listToArray(self):
 		result = []
@@ -923,8 +860,6 @@ class AVLTreeList(object):
 				listtoArray_rec(node.getLeft())
 				result.append(node.getValue())
 				listtoArray_rec(node.getRight())
-
-		#check that global/local variables are not an issue
 
 		listtoArray_rec(self.root)
 		return result
@@ -949,15 +884,10 @@ class AVLTreeList(object):
 	@returns: a list [left, val, right], where left is an AVLTreeList representing the list until index i-1,
 	right is an AVLTreeList representing the list from index i+1, and val is the value at the i'th index.
 	"""
-
 	#find node in place i, than go up to the root and join bigger subtrees to Large tree, and smaller subtrees to Small Tree
 	# time complexity: O(log(n))
+
 	def split(self, i):
-		
-		#uncomment the following below in order to get results for Q2
-		# height_difference = 0
-		# join_count = 0
-		# max_diff = 0
 
 		x = self.TreeSelect(i+1)
 		val_x = x.getValue()
@@ -1002,13 +932,6 @@ class AVLTreeList(object):
 		x.AVLdelete()
 
 		while (y != None):  #go from x to the root
-			#if come from left:  we join red trees
-			#join (large_tree, y, y.getRight - as a tree- temp)
-
-			#if come from left== false:  we join yellow trees
-			#join (y.get Left as a tree - temp, y, small_tree)
-			#we need to save come_from_left for next itertion before join
-			#we need to cut y from the tree 
 
 			z = y.getParent()
 
@@ -1025,12 +948,7 @@ class AVLTreeList(object):
 				temp_bigger_tree.root.setParent(None)
 				temp_bigger_tree.min = temp_bigger_tree.root
 				temp_bigger_tree.max = temp_bigger_tree.root
-				
-				# new_diff = abs(large_tree.root.getHeight() - temp_bigger_tree.root.getHeight())
-				# height_difference += new_diff
-				# join_count += 1
-				# if max_diff < new_diff:
-				# 	max_diff = new_diff
+
 				large_tree = large_tree.AVL_join(temp_bigger_tree, y)
 
 			else:  
@@ -1047,12 +965,6 @@ class AVLTreeList(object):
 				temp_smaller_tree.min = temp_smaller_tree.root
 				temp_smaller_tree.max = temp_smaller_tree.root
 
-
-				# new_diff = abs(small_tree.root.getHeight() - temp_smaller_tree.root.getHeight())
-				# height_difference += new_diff
-				# join_count += 1
-				# if max_diff < new_diff:
-				# 	max_diff = new_diff
 				small_tree = temp_smaller_tree.AVL_join(small_tree, y )
 
 			y = z  #go up to the parent
@@ -1063,7 +975,6 @@ class AVLTreeList(object):
 		large_tree.min = large_tree_min
 		large_tree.max = large_tree_max
 
-		# print(f"max: {max_diff} \n average : {height_difference/join_count}")
 		return [small_tree ,val_x, large_tree]
 
 	"""concatenates lst to self
@@ -1073,6 +984,8 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
+	#time complexity: O(log(n)) WC
+
 	def concat(self, lst):
 
 		height_difference = abs(self.root.getHeight() - lst.root.getHeight())
@@ -1100,6 +1013,8 @@ class AVLTreeList(object):
 	@rtype: joined AVLTree
 	@returns: the tree formed by T1 T2 and x
 	"""
+	#time complexity: O(log(n)) WC
+
 	def AVL_join(T1, T2, x):
 
 		def join(small_tree, big_tree, x, is_equal , small_tree_first): #joins given that small_tree <= big_tree
@@ -1167,7 +1082,7 @@ class AVLTreeList(object):
 			small_tree.root.setParent(x) 						#finally set pointers back to x
 			join_node.setParent(x)
 
-			#now big tree conatins small tree
+			#now big tree contains small tree
 			big_tree.root.setParent(None)			#a fix in case x was not an empty node previously, like in split
 			big_tree.delete_style_balancing(x, 0)   #balancing the tree, we dont need balancing steps info, so we put bs number
 			small_tree.root = big_tree.root			#now both trees point to the same, joined tree
@@ -1217,14 +1132,7 @@ class AVLTreeList(object):
 		else:
 			return join(T1, T2, x, True, True)  #save order. correct for case if both are empty 
 
-		
 
-
-		
-
-			
-
-	
 	"""searches for a *value* in the list
 	@type val: str
 	@param val: a value to be searched
@@ -1234,6 +1142,7 @@ class AVLTreeList(object):
 	#recursively found the node with the value, 
 	#by using global values that save the node and if value was found
 	#then performed tree_rank on found value, if found (else return -1)
+
 	#time complexity: O(n)
 
 	def search(self, val):
@@ -1260,16 +1169,11 @@ class AVLTreeList(object):
 			
 			return found
 
-
-
 		found = search_rec(self.root, val)
 		if not found:
 			return -1
 		else:
 			return culprit.Tree_rank() 
-
-
-
 
 
 	"""returns the root of the tree representing the list
@@ -1278,388 +1182,115 @@ class AVLTreeList(object):
 	@returns: the root, None if the list is empty
 	"""
 	#if the list isnt empty then we can return a root
-	# O(1) since empty is O(1)
+
+	# Time complexity: O(1)
+
 	def getRoot(self):
 		if not self.empty():
 			return self.root
 		return None
 
-	def insert_BST(self, i, val):
 
-		newNode = AVLNode(val)
-		balancing_steps = 0 #counting how many fixes to height and rotations
 
-		#if empty tree, we create new tree
-		if self.empty():
-			self.root = newNode
-			virtualRight = AVLNode(None)
-			virtualLeft = AVLNode(None)
-			newNode.setRight(virtualRight)
-			virtualRight.setParent(newNode)
-			newNode.setLeft(virtualLeft)
-			virtualLeft.setParent(newNode)
-			newNode.updateMeasurements()
-			self.min = newNode
-			self.max = newNode #max is now also the root
+	#our version of BST insert without balancing :)	
 
-		#1
-		else:
-			if i==self.length(): 
-				#insert last, last node has two virtual nodes, we insert in between last node and its virtual node
-				#the newNode, than make new leftVirtual to the newNode 
+	# def insert_BST(self, i, val):
+
+	# 	newNode = AVLNode(val)
+	# 	balancing_steps = 0 #counting how many fixes to height and rotations
+
+	# 	#if empty tree, we create new tree
+	# 	if self.empty():
+	# 		self.root = newNode
+	# 		virtualRight = AVLNode(None)
+	# 		virtualLeft = AVLNode(None)
+	# 		newNode.setRight(virtualRight)
+	# 		virtualRight.setParent(newNode)
+	# 		newNode.setLeft(virtualLeft)
+	# 		virtualLeft.setParent(newNode)
+	# 		newNode.updateMeasurements()
+	# 		self.min = newNode
+	# 		self.max = newNode #max is now also the root
+
+	# 	#1
+	# 	else:
+	# 		if i==self.length(): 
+	# 			#insert last, last node has two virtual nodes, we insert in between last node and its virtual node
+	# 			#the newNode, than make new leftVirtual to the newNode 
 				
-				last_node = self.max
-				virtualLeft = AVLNode(None)
-				virtualRight = last_node.getRight()
-				newNode.setRight(virtualRight)
-				newNode.setLeft(virtualLeft)
-				last_node.setRight(newNode)
+	# 			last_node = self.max
+	# 			virtualLeft = AVLNode(None)
+	# 			virtualRight = last_node.getRight()
+	# 			newNode.setRight(virtualRight)
+	# 			newNode.setLeft(virtualLeft)
+	# 			last_node.setRight(newNode)
 
-				virtualLeft.setParent(newNode)
-				virtualRight.setParent(newNode)
-				newNode.setParent(last_node)
+	# 			virtualLeft.setParent(newNode)
+	# 			virtualRight.setParent(newNode)
+	# 			newNode.setParent(last_node)
 
-			elif i == 0:
-				first_node = self.min
-				virtualRight = AVLNode(None)
-				virtualLeft = first_node.getLeft()
-				newNode.setRight(virtualRight)
-				newNode.setLeft(virtualLeft)
-				first_node.setLeft(newNode)
+	# 		elif i == 0:
+	# 			first_node = self.min
+	# 			virtualRight = AVLNode(None)
+	# 			virtualLeft = first_node.getLeft()
+	# 			newNode.setRight(virtualRight)
+	# 			newNode.setLeft(virtualLeft)
+	# 			first_node.setLeft(newNode)
 
-				virtualLeft.setParent(newNode)
-				virtualRight.setParent(newNode)
-				newNode.setParent(first_node)
-
-
-			else:
-				currNode = self.TreeSelect(i+1)
-				if not currNode.getLeft().isRealNode():
-					#insert in index i, curr has left virtual nodes, we insert in between curr and its virtual node
-					#the newNode, than make new RightVirtual to the newNode  
-					virtualLeft = currNode.getLeft()
-					virtualRight = AVLNode(None)
-					newNode.setLeft(virtualLeft)
-					newNode.setRight(virtualRight)
-					currNode.setLeft(newNode)
-
-					virtualLeft.setParent(newNode)
-					virtualRight.setParent(newNode)
-					newNode.setParent(currNode)
+	# 			virtualLeft.setParent(newNode)
+	# 			virtualRight.setParent(newNode)
+	# 			newNode.setParent(first_node)
 
 
-				else:
-					#insert in index i, pre has two virtual nodes, we insert in between pre and its virtual node
-					#the newNode, than make new leftVirtual to the newNode 
-					preNode = currNode.getPredecessor()
-					virtualLeft = AVLNode(None)
-					virtualRight = preNode.getRight()
-					newNode.setRight(virtualRight)
-					newNode.setLeft(virtualLeft)
-					preNode.setRight(newNode)
+	# 		else:
+	# 			currNode = self.TreeSelect(i+1)
+	# 			if not currNode.getLeft().isRealNode():
+	# 				#insert in index i, curr has left virtual nodes, we insert in between curr and its virtual node
+	# 				#the newNode, than make new RightVirtual to the newNode  
+	# 				virtualLeft = currNode.getLeft()
+	# 				virtualRight = AVLNode(None)
+	# 				newNode.setLeft(virtualLeft)
+	# 				newNode.setRight(virtualRight)
+	# 				currNode.setLeft(newNode)
 
-					virtualLeft.setParent(newNode)
-					virtualRight.setParent(newNode)
-					newNode.setParent(preNode)
+	# 				virtualLeft.setParent(newNode)
+	# 				virtualRight.setParent(newNode)
+	# 				newNode.setParent(currNode)
+
+
+	# 			else:
+	# 				#insert in index i, pre has two virtual nodes, we insert in between pre and its virtual node
+	# 				#the newNode, than make new leftVirtual to the newNode 
+	# 				preNode = currNode.getPredecessor()
+	# 				virtualLeft = AVLNode(None)
+	# 				virtualRight = preNode.getRight()
+	# 				newNode.setRight(virtualRight)
+	# 				newNode.setLeft(virtualLeft)
+	# 				preNode.setRight(newNode)
+
+	# 				virtualLeft.setParent(newNode)
+	# 				virtualRight.setParent(newNode)
+	# 				newNode.setParent(preNode)
 					
-			if i==self.length(): #updates max and min only after inserting the node, to help with case when list is empty
-				self.max = newNode
-			if i == 0:
-				self.min = newNode
-
-			newNode.updateMeasurements() #update size and height without adding to balancing_steps since its a new node not updated node
-			#2
-
-			y = newNode.getParent()
-			while y != None:
-				y.updateMeasurements()
-
-				if not y.getHeightUpdate():
-						break
-				else:
-					y = y.getParent()
-					balancing_steps += 1
-
-			if y != None: ###height may not change now but size certainly has
-				y.fix_size_rec()
-
-		return balancing_steps
-
-	#remove this
-	def append(self, val):
-		return self.insert(self.length(), val)
-	def getTreeHeight(self):
-		return root.getHeight()
-
-
-
-
-
-
-###################################################### printree ######################################################
-###################################################### function ######################################################
-
-def printree(t, bykey=False):
-	"""Print a textual representation of t
-	bykey=True: show keys instead of values"""
-	return trepr(t, t.root, bykey)
-
-
-def trepr(t, node, bykey=False):
-	"""Return a list of textual representations of the levels in t
-	bykey=True: show keys instead of values"""
-	if not node.isRealNode():  # You might want to change this, depending on your implementation
-		return ["#"]    # Hashtag marks a virtual node
-
-	thistr = str(node.getValue())
-
-	return conc(trepr(t, node.getLeft(), bykey), thistr, trepr(t, node.getRight(), bykey))
-
-
-def conc(left, root, right):
-	"""Return a concatenation of textual representations of
-	a root node, its left node, and its right node
-	root is a string, and left and right are lists of strings"""
-
-	lwid = len(left[-1])
-	rwid = len(right[-1])
-	rootwid = len(root)
-
-	result = [(lwid + 1) * " " + root + (rwid + 1) * " "]
-
-	ls = leftspace(left[0])
-	rs = rightspace(right[0])
-	result.append(ls * " " + (lwid - ls) * "_" + "/" + rootwid * " " + "\\" + rs * "_" + (rwid - rs) * " ")
-
-	for i in range(max(len(left), len(right))):
-		row = ""
-		if i < len(left):
-			row += left[i]
-		else:
-			row += lwid * " "
-
-		row += (rootwid + 2) * " "
-
-		if i < len(right):
-			row += right[i]
-		else:
-			row += rwid * " "
-
-		result.append(row)
-
-	return result
-
-
-def leftspace(row):
-	"""helper for conc"""
-	# row is the first row of a left node
-	# returns the index of where the second whitespace starts
-	i = len(row) - 1
-	while row[i] == " ":
-		i -= 1
-	return i + 1
-
-
-def rightspace(row):
-	"""helper for conc"""
-	# row is the first row of a right node
-	# returns the index of where the first whitespace ends
-	i = 0
-	while row[i] == " ":
-		i += 1
-	return i
-
-
-
-# ###################################################
-# import random
-# def Q_1(i):
-	
-# 	print(f"Experiment {i}")
-
-# 	tree_size = 1000*(2**i)
-
-# 	### experiment 1
-# 	print("Experiment 1:")
-# 	AVL1 = AVLTreeList()
-# 	total_steps=0
-# 	for x in range(tree_size):
-# 		index = random.randint(0, x) 
-# 		total_steps += AVL1.insert(index, 'x') 
-
-# 	print(total_steps)
-	
-
-
-# 	### experiment 2
-# 	print("Experiment 2:")
-# 	total_steps=0
-# 	for y in range(tree_size-1, -1, -1):
-# 		index = random.randint(0, y)
-# 		total_steps += AVL1.delete(index) 
-
-# 	print(total_steps)
-
-# 	### experiment 3
-# 	print("Experiment 3:")
-# 	AVL3 = AVLTreeList()
-# 	total_steps=0
-# 	for z in range(tree_size//2):
-# 		index = random.randint(0, z) 
-# 		AVL3.insert(index, 'x') 
-
-# 	for w in range(tree_size//2 -1, 0, -2):
-# 		index1 = random.randint(0, w) 
-# 		total_steps += AVL3.delete(index1)
-
-
-# 		index2 = random.randint(0, w)   
-# 		total_steps += AVL3.insert(index2, w) 
-
-# 	print(total_steps)
-# 	print("Done!")
-
-
-# for i in range(10):
-#     Q_1(i+1)
-
-
-# #experiment 2
-
-# def max_in_left(avl_tree):
-# 	node = avl_tree.getRoot()
-# 	if node == None:
-# 		print("Fail")
-# 		return None
-# 	else:
-# 		node = node.getLeft()
-# 		while node.isRealNode():
-# 			node = node.getRight()
-		
-# 		return node.getParent().Tree_rank()
-
-
-# def Q_2(i):
-	
-# 	print(f"Experiment {i}")
-
-# 	tree_size = 1000*(2**i)
-
-# 	### experiment random
-# 	print("Experiment random:")
-# 	AVL1 = AVLTreeList()
-
-# 	for x in range(tree_size):
-# 		index = random.randint(0, x) 
-# 		AVL1.insert(index, 'x') 
-	
-# 	random_split_index = random.randint(0, tree_size-1) 
-# 	AVL1.split(random_split_index)
-
-# 	### experiment min max
-# 	print("Experiment min-max:")
-# 	AVL2 = AVLTreeList()
-
-
-# 	for x in range(tree_size):
-# 		index = random.randint(0, x) 
-# 		AVL2.insert(index, 'x') 
-	
-# 	minmax_split_index = max_in_left(AVL2)
-# 	AVL2.split(minmax_split_index)
-
-# for i in range(10):
-# 	Q_2(i+1)
-
-# def generate_perfect_indexes(r):
-#     count = 0
-#     i = 0
-#     j = 0
-#     power = 1
-#     while count < r:
-#         if i <= j:
-#             count += 1
-#             yield i
-#             i += 2
-#         else:
-#             i = 0
-#             j += 2**power
-#             power += 1
-
-# def Q3(i):
-
-# 		print(f"Experiment {i}")
-# 		tree_size = 1000*i
-
-# 	### experiment Arithmetic progression
-# 		print("Experiment Arithmetic progression:")
-# 		AVL1 = AVLTreeList()
-# 		BST1 = AVLTreeList()
-
-# 		total_steps_AVL=0
-# 		total_steps_BST=0
-# 		total_depth_AVL=0
-# 		total_depth_BST=0
-
-# 		for x in range(tree_size):
-# 			total_steps_AVL += AVL1.insert(0, x)
-# 			total_depth_AVL+= AVL1.root.getHeight() - AVL1.TreeSelect(1).getHeight()
-# 			total_steps_BST += BST1.insert_BST(0, x)
-# 			total_depth_BST += x
-# 			#print(x)
-
-# 		print(f"AVL: {total_steps_AVL/tree_size}")
-# 		print(f"BST: {total_steps_BST/tree_size}")
-# 		print(f"AVL: {total_depth_AVL/tree_size}")
-# 		print(f"BST: {total_depth_BST/tree_size}")
-
-# 	## experiment balance
-# 		print("Experiment balance:")
-# 		AVL2 = AVLTreeList()
-# 		BST2 = AVLTreeList()
-
-# 		total_steps_AVL=0
-# 		total_steps_BST=0
-# 		total_depth_AVL=0
-# 		total_depth_BST=0		
-# 		x = 0
-# 		generator = generate_perfect_indexes(tree_size)
-# 		for h in generator:
-# 				total_steps_AVL += AVL2.insert(h, x)
-# 				total_steps_BST += BST2.insert_BST(h, x)
-# 				total_depth_AVL+= AVL2.root.getHeight() - AVL2.TreeSelect(x+1).getHeight()
-# 				total_depth_BST+= BST2.root.getHeight() - BST2.TreeSelect(x+1).getHeight()
-# 				x +=1
-# 		print(f"AVL: {total_steps_AVL/tree_size}")
-# 		print(f"BST: {total_steps_BST/tree_size}")
-# 		print(f"AVL: {total_depth_AVL/tree_size}")
-# 		print(f"BST: {total_depth_BST/tree_size}")
-
-# 	###experiment random
-# 		print("Experiment random:")
-# 		AVL3 = AVLTreeList()
-# 		BST3 = AVLTreeList()
-
-# 		total_steps_AVL=0
-# 		total_steps_BST=0
-# 		total_depth_AVL=0
-# 		total_depth_BST=0
-
-# 		for x in range(tree_size):
-# 			index = random.randint(0, x) 
-# 			total_steps_AVL += AVL3.insert(index, index) 
-# 			total_steps_BST += BST3.insert_BST(index, index)
-# 			total_depth_AVL+= AVL3.root.getHeight() - AVL3.TreeSelect(index+1).getHeight()
-# 			total_depth_BST+= BST3.root.getHeight() - BST3.TreeSelect(index+1).getHeight()
-
-# 		print(f"AVL: {total_steps_AVL/tree_size}")
-# 		print(f"BST: {total_steps_BST/tree_size}")
-# 		print(f"AVL: {total_depth_AVL/tree_size}")
-# 		print(f"BST: {total_depth_BST/tree_size}")
-
-
-# for i in range(10):
-#     Q3(i+1)
-
-
-
+	# 		if i==self.length(): #updates max and min only after inserting the node, to help with case when list is empty
+	# 			self.max = newNode
+	# 		if i == 0:
+	# 			self.min = newNode
+
+	# 		newNode.updateMeasurements() #update size and height without adding to balancing_steps since its a new node not updated node
+	# 		#2
+
+	# 		y = newNode.getParent()
+	# 		while y != None:
+	# 			y.updateMeasurements()
+
+	# 			if not y.getHeightUpdate():
+	# 					break
+	# 			else:
+	# 				y = y.getParent()
+	# 				balancing_steps += 1
+
+	# 		if y != None: ###height may not change now but size certainly has
+	# 			y.fix_size_rec()
+
+	# 	return balancing_steps
