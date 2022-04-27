@@ -4,11 +4,9 @@
 #id2      - 318459666
 #name2    - Gal Kariel 
 
-##note to checker of this project: we created a separate insert for BST called insert_BST. it is an AVLtree function.
+##Note to checker of this project: we created a separate insert for BST called insert_BST. It is the last function in the File, and it is commented out.
 
 """A class represnting a node in an AVL tree"""
-import sys
-sys.setrecursionlimit(100000)
 from ast import Global
 from hashlib import new
 from logging import root
@@ -171,6 +169,7 @@ class AVLNode(object):
 	@returns: None
 	"""
 	#time complexity: O(1)
+
 	def updateMeasurements(self):
 		#update height	
 		oldHeight = self.getHeight()
@@ -215,8 +214,7 @@ class AVLNode(object):
 	@rtype: int
 	@returns: the BF
 	"""
-	#gets BF 
-	#time complexity: O(1) bc its just math
+	#time complexity: O(1) 
 
 	def getBF(self):
 		if self.isRealNode():
@@ -276,16 +274,18 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	#time complexity: O(1)
+
 	def AVLdelete(self):
 		self.setParent(None)
 		self.right = None
 		self.left = None
 		
 	"""returns bool if node is left child
-		@pre: node has parent
-		@rtype: bool
-		@returns: returns true if node is left child
-		"""
+    @pre: node has parent
+    @rtype: bool
+    @returns: returns true if node is left child
+    """
+    #time complexity: O(1)
 
 	def is_left_child(self):
 		if self == self.getParent().getLeft():
@@ -294,26 +294,26 @@ class AVLNode(object):
 
 
 
-	"""given a certain node and returns the min node
+	"""given a certain node and returns the min node of subtree
 
 	@rtype: AVL node
 	@returns: the min Node , Node itself if there is no left node
 	"""
-	#We go all the way left until we arrive at a virtual node
 	#time complexity: O(log(n))
-	def MinNode(self):
+
+	def MinNode(self):          #We go all the way left until we arrive at a virtual node
 		while self.getLeft().isRealNode(): 
 			self = self.getLeft()
 		return self	
 
-	"""given a certain node and returns the max node
+	"""given a certain node and returns the max node of subtree
 
 	@rtype: AVL node
 	@returns: the max Node , Node itself if there is no right node
 	"""
-	#We go all the way right until we arrive at a virtual node
 	#time complexity: O(log(n))
-	def MaxNode(self):
+
+	def MaxNode(self):          #We go all the way right until we arrive at a virtual node
 		while self.getRight().isRealNode(): 
 			self = self.getRight()
 		return self	
@@ -326,8 +326,7 @@ class AVLNode(object):
 	@rtype: int
 	@returns: the index of node
 	"""
-	#we created this function, based on psuedocode from PPT 4a page 36 
-	#time complexity: log(n)
+	#time complexity: O(log(n))
 
 	def Tree_rank(self):
 		r = self.getLeft().getSize() + 1
@@ -360,23 +359,14 @@ class AVLTreeList(object):
 		self.root = AVLNode(None)
 		self.min = self.getRoot()
 		self.max = self.getRoot()
-		# add your fields here
-
-
-	def __repr__(self):
-		out = ""
-		for row in printree(self):  # need printree.py file
-			out = out + row + "\n"
-		return out
-
+        
 
 	"""returns whether the list is empty
 
 	@rtype: bool
 	@returns: True if the list is empty, False otherwise
 	"""
-	# if root is not real (since we initialized it as virtual node) then Tree is empty
-	#O(1) since isRealNode is O(1)
+   #time complexity: O(1)
 	def empty(self):
 		if not self.root.isRealNode():
 			return True
@@ -391,14 +381,7 @@ class AVLTreeList(object):
 	@rtype: node
 	@returns:  the node of the i'th item in the list
 	"""
-	# pseudo code TreeSelectRec(x, i)
-	# r = x.left.size +1
-	# if x = r
-	# 	return x.value
-	# else if i<r
-	#  	return TreeSelectRec(x.left, i)
-	#  else:
-	# 		return TreeSelectRec(x.right, i-r) 
+   #time complexity: O(log(n))
 	
 	def TreeSelect(self, i):
 		
@@ -422,22 +405,12 @@ class AVLTreeList(object):
 	@rtype: str
 	@returns: the the value of the i'th item in the list
 	"""
-	# we will use in Tree select for retrieve
-	#if i not legal index return none
 	# time complexity(log(n))
-
 
 	def retrieve(self, i):
 		if (i<0 or i>= self.length()): 
 			return None
 		return self.TreeSelect(i+1).getValue()
-
-
-
-
-
-
-
 
 	"""inserts val at position i in the list
 
@@ -1101,6 +1074,7 @@ class AVLTreeList(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 	def concat(self, lst):
+
 		height_difference = abs(self.root.getHeight() - lst.root.getHeight())
 
 		if not self.empty() :
@@ -1222,11 +1196,11 @@ class AVLTreeList(object):
 				T2.max = x
 				T1.min = x
 				T1.max = x
-			else:								#T2 is empty
+			else:								#T2 is not empty
 				T2.min = x
 				T1.min = x
 				T1.max = T2.max			
-		elif T2height == -1:
+		elif T2height == -1:                    #T2 is empty
 			T1.max = x
 			T2.min = T1.min
 			T2.max = x
